@@ -9,6 +9,7 @@ import SavedPage from "@/pages/saved-page";
 import ProfilePage from "@/pages/profile-page";
 import UploadPage from "@/pages/upload-page";
 import GalleryPage from "@/pages/gallery-page";
+import AuthProvider from './components/AuthProvider'; // Assuming AuthProvider is defined elsewhere
 
 function Router() {
   return (
@@ -17,20 +18,26 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/" component={HomePage} />
       <Route path="/gallery/:id" component={GalleryPage} />
-      
+
       {/* Rotas protegidas - exigem login */}
       <ProtectedRoute path="/feed" component={FeedPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/profile/:username?" component={ProfilePage} />
       <ProtectedRoute path="/upload" component={UploadPage} />
-      
+
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function App() {
-  return <Router />;
+  return (
+    <AuthProvider>
+      <div className="min-h-screen bg-background">
+        <Router />
+      </div>
+    </AuthProvider>
+  );
 }
 
 export default App;

@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import multer from "multer";
 import path from "path";
+import ffmpeg from "fluent-ffmpeg";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import { promisify } from "util";
@@ -402,23 +403,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           thumbnailUrl = await storage.saveFile(thumbnailBuffer, 'image/jpeg', thumbnailName);
         } else {
-          // For videos, we would normally extract a frame, but for simplicity
-          // we'll use a placeholder or the first frame
-          // In a real implementation, this would use ffmpeg to extract a frame
+          // For videos, extract the first frame as thumbnail using ffmpeg
           const thumbnailName = `${fileId}_thumb.jpg`;
+          const thumbnailPath = path.join(uploadsDir, thumbnailName);
           
-          // Here we're just using a black rectangle as a placeholder
-          // In a real implementation, you'd use ffmpeg to extract a frame
-          const thumbnailBuffer = await sharp({
-            create: {
-              width: 400,
-              height: 225,
-              channels: 3,
-              background: { r: 0, g: 0, b: 0 }
-            }
-          })
-          .jpeg()
-          .toBuffer();
+          // Save video file temporarily to extract thumbnail
+          const tempVideoPath = path.join(uploadsDir, fileName);
+          await promisify(fs.writeFile)(tempVideoPath, file.buffer);
+          
+          // Extract thumbnail using ffmpeg
+          await new Promise((resolve, reject) => {
+            ffmpeg(tempVideoPath)
+              .screenshots({
+                timestamps: ['1'],
+                filename: thumbnailName,
+                folder: uploadsDir,
+                size: '400x225'
+              })
+              .on('end', resolve)
+              .on('error', reject);
+          });
+          
+          // Read the generated thumbnail
+          const thumbnailBuffer = await promisify(fs.readFile)(thumbnailPath);
+          
+          // Clean up temporary files
+          await promisify(fs.unlink)(tempVideoPath);
+          await promisify(fs.unlink)(thumbnailPath);
           
           thumbnailUrl = await storage.saveFile(thumbnailBuffer, 'image/jpeg', thumbnailName);
         }

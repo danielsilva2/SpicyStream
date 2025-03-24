@@ -30,7 +30,30 @@ export default function ContentGrid({ content: initialContent }: ContentGridProp
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleContent.map((item) => (
-          <ContentCard key={item.id} content={item} />
+          <Link key={item.id} href={`/gallery/${item.id}`}>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              <div className="relative pb-[56.25%]">
+                <img 
+                  src={item.thumbnailUrl || '/placeholder.jpg'} 
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.jpg';
+                  }}
+                />
+                {item.fileType === 'video' && (
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 px-2 py-1 rounded text-xs text-white">
+                    {item.duration || '0:00'}
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-medium text-neutral-dark truncate">{item.title}</h3>
+                <p className="text-sm text-neutral mt-1">@{item.username}</p>
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
 

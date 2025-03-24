@@ -677,8 +677,8 @@ export class MemStorage implements IStorage {
         visibility: "public",
         items: [
           {
-            fileUrl: "/uploads/demo-image-1.jpg",
-            thumbnailUrl: "/uploads/demo-image-1-thumb.jpg",
+            fileUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee",
+            thumbnailUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee?w=400",
             fileType: "image"
           },
           {

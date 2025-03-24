@@ -598,9 +598,34 @@ export class MemStorage implements IStorage {
         ]
       });
       
+      // Galeria 4 - Imagens enviadas pelo usuário
+      const gallery4 = await this.createGallery({
+        title: "Imagens do Erome",
+        description: "Imagens que foram enviadas pelo usuário",
+        userId: demoUser1.id,
+        tags: ["erome", "uploads", "exemplos"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "/uploads/images/image1.png",
+            thumbnailUrl: "/uploads/images/image1.png",
+            fileType: "image"
+          },
+          {
+            fileUrl: "/uploads/images/image2.jpg",
+            thumbnailUrl: "/uploads/images/image2.jpg",
+            fileType: "image"
+          }
+        ]
+      });
+      
       // Adicionar likes e comentários
       await this.likeGallery(demoUser1.id, gallery2.id);
       await this.saveGallery(demoUser1.id, gallery2.id);
+      
+      // Likes para a galeria de imagens do Erome
+      await this.likeGallery(demoUser2.id, gallery4.id);
+      await this.saveGallery(demoUser2.id, gallery4.id);
       
       // Comentários
       const comment1 = await this.createComment(gallery2.id, demoUser1.id, "Excelente galeria, gostei muito do conteúdo!");

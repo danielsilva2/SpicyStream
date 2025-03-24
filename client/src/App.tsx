@@ -9,7 +9,7 @@ import SavedPage from "@/pages/saved-page";
 import ProfilePage from "@/pages/profile-page";
 import UploadPage from "@/pages/upload-page";
 import GalleryPage from "@/pages/gallery-page";
-import AuthProvider from './components/AuthProvider'; // Assuming AuthProvider is defined elsewhere
+import { AuthProvider } from "./hooks/use-auth"; // Assuming AuthProvider is defined elsewhere
 
 function Router() {
   return (

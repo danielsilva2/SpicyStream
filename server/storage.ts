@@ -720,7 +720,9 @@ export class MemStorage implements IStorage {
       console.error("Erro ao inicializar dados de demonstração:", error);
     }
   }
-      await this.createGallery({
+}
+
+export const storage = new MemStorage();
         title: "Nature Collection",
         description: "Beautiful nature scenes from around the world",
         userId: demoUser2.id,

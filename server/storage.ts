@@ -71,7 +71,6 @@ export class MemStorage implements IStorage {
   uploadDirectory: string;
 
   constructor() {
-    // Initialize maps for in-memory storage
     this.usersData = new Map();
     this.followsData = new Map();
     this.galleriesData = new Map();
@@ -80,7 +79,6 @@ export class MemStorage implements IStorage {
     this.savesData = new Map();
     this.commentsData = new Map();
 
-    // Initialize auto-increment IDs
     this.currentUserId = 1;
     this.currentGalleryId = 1;
     this.currentContentItemId = 1;
@@ -89,27 +87,22 @@ export class MemStorage implements IStorage {
     this.currentSaveId = 1;
     this.currentCommentId = 1;
 
-    // Set up session store
     this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
+      checkPeriod: 86400000
     });
 
-    // Set up upload directory
     this.uploadDirectory = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(this.uploadDirectory)) {
       fs.mkdirSync(this.uploadDirectory, { recursive: true });
     }
 
-    // Add demo content
     this.seedDemoData();
   }
 
-  // User operations
   async getUser(id: number): Promise<User | undefined> {
     const user = this.usersData.get(id);
     if (!user) return undefined;
 
-    // Add additional calculated fields
     const followersCount = await this.getFollowersCount(id);
     const contentCount = await this.getUserContentCount(id);
 
@@ -123,7 +116,6 @@ export class MemStorage implements IStorage {
 
     if (!user) return undefined;
 
-    // Add additional calculated fields
     const followersCount = await this.getFollowersCount(user.id);
     const contentCount = await this.getUserContentCount(user.id);
 
@@ -143,17 +135,12 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  // Follow operations
   async followUser(followerId: number, followingId: number): Promise<void> {
-    // Check if already following
     const isAlreadyFollowing = await this.isFollowing(followerId, followingId);
     if (isAlreadyFollowing) return;
 
     const id = this.currentFollowId++;
-    this.followsData.set(id, { 
-      followerId, 
-      followingId
-    });
+    this.followsData.set(id, { followerId, followingId });
   }
 
   async unfollowUser(followerId: number, followingId: number): Promise<void> {
@@ -178,7 +165,6 @@ export class MemStorage implements IStorage {
     ).length;
   }
 
-  // Content & Gallery operations
   async createGallery(galleryData: any): Promise<Gallery> {
     const id = this.currentGalleryId++;
     const now = new Date();
@@ -193,12 +179,10 @@ export class MemStorage implements IStorage {
       viewCount: 0,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
-      // Additional fields needed for frontend
-      username: '', // Will be filled in
-      items: []     // Will be populated with content items
+      username: '',
+      items: []
     };
 
-    // Get username and add it to gallery
     const user = await this.getUser(galleryData.userId);
     if (user) {
       gallery.username = user.username;
@@ -206,7 +190,6 @@ export class MemStorage implements IStorage {
 
     this.galleriesData.set(id, gallery);
 
-    // Add content items if provided
     if (galleryData.items && Array.isArray(galleryData.items)) {
       for (const item of galleryData.items) {
         const contentId = this.currentContentItemId++;
@@ -233,12 +216,10 @@ export class MemStorage implements IStorage {
     const gallery = this.galleriesData.get(id);
     if (!gallery) return undefined;
 
-    // Get items for this gallery
     const items = Array.from(this.contentItemsData.values()).filter(
       (item) => item.galleryId === id
     );
 
-    // Add items to gallery
     gallery.items = items;
 
     return gallery;
@@ -249,9 +230,7 @@ export class MemStorage implements IStorage {
       .filter((gallery) => gallery.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    // Convert galleries to content format
     return userGalleries.map(gallery => {
-      // Get the first item for the thumbnail
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
       ) || {
@@ -276,7 +255,6 @@ export class MemStorage implements IStorage {
     let galleries = Array.from(this.galleriesData.values())
       .filter(gallery => gallery.visibility === 'public');
 
-    // Apply sorting
     if (sortBy === 'popular') {
       galleries = galleries.sort((a, b) => {
         const likesA = Array.from(this.likesData.values()).filter(like => like.galleryId === a.id).length;
@@ -286,16 +264,12 @@ export class MemStorage implements IStorage {
     } else if (sortBy === 'views') {
       galleries = galleries.sort((a, b) => b.viewCount - a.viewCount);
     } else {
-      // Default to recent
       galleries = galleries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
-    // Apply pagination
     galleries = galleries.slice(offset, offset + limit);
 
-    // Convert galleries to content format
     return galleries.map(gallery => {
-      // Get the first item for the thumbnail
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
       ) || {
@@ -303,7 +277,6 @@ export class MemStorage implements IStorage {
         fileType: 'image'
       };
 
-      // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
 
@@ -321,22 +294,17 @@ export class MemStorage implements IStorage {
   }
 
   async getFeedContent(userId: number, limit = 20, offset = 0): Promise<Content[]> {
-    // Get list of users that this user follows
     const followingIds = Array.from(this.followsData.values())
       .filter(follow => follow.followerId === userId)
       .map(follow => follow.followingId);
 
-    // Get galleries from those users
     let feedGalleries = Array.from(this.galleriesData.values())
       .filter(gallery => followingIds.includes(gallery.userId) && gallery.visibility === 'public')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    // Apply pagination
     feedGalleries = feedGalleries.slice(offset, offset + limit);
 
-    // Convert galleries to content format
     return feedGalleries.map(gallery => {
-      // Get the first item for the thumbnail
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
       ) || {
@@ -344,7 +312,6 @@ export class MemStorage implements IStorage {
         fileType: 'image'
       };
 
-      // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
 
@@ -362,22 +329,17 @@ export class MemStorage implements IStorage {
   }
 
   async getSavedContent(userId: number, limit = 20, offset = 0): Promise<Content[]> {
-    // Get list of gallery IDs that this user has saved
     const savedGalleryIds = Array.from(this.savesData.values())
       .filter(save => save.userId === userId)
       .map(save => save.galleryId);
 
-    // Get galleries that the user has saved
     let savedGalleries = Array.from(this.galleriesData.values())
       .filter(gallery => savedGalleryIds.includes(gallery.id))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    // Apply pagination
     savedGalleries = savedGalleries.slice(offset, offset + limit);
 
-    // Convert galleries to content format
     return savedGalleries.map(gallery => {
-      // Get the first item for the thumbnail
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
       ) || {
@@ -385,7 +347,6 @@ export class MemStorage implements IStorage {
         fileType: 'image'
       };
 
-      // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
 
@@ -416,9 +377,7 @@ export class MemStorage implements IStorage {
     ).length;
   }
 
-  // Interactions
   async likeGallery(userId: number, galleryId: number): Promise<void> {
-    // Check if already liked
     const isAlreadyLiked = await this.isGalleryLiked(userId, galleryId);
     if (isAlreadyLiked) return;
 
@@ -443,7 +402,6 @@ export class MemStorage implements IStorage {
   }
 
   async saveGallery(userId: number, galleryId: number): Promise<void> {
-    // Check if already saved
     const isAlreadySaved = await this.isGallerySaved(userId, galleryId);
     if (isAlreadySaved) return;
 
@@ -467,19 +425,15 @@ export class MemStorage implements IStorage {
     );
   }
 
-  // Comments
   async getComments(galleryId: number): Promise<Comment[]> {
-    // Get all root comments
     const rootComments = Array.from(this.commentsData.values())
       .filter(comment => comment.galleryId === galleryId && !comment.parentId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    // Get all replies
     const replies = Array.from(this.commentsData.values())
       .filter(comment => comment.galleryId === galleryId && !!comment.parentId)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-    // Organize replies by parent
     for (const rootComment of rootComments) {
       rootComment.replies = replies.filter(reply => reply.parentId === rootComment.id);
     }
@@ -491,7 +445,6 @@ export class MemStorage implements IStorage {
     const id = this.currentCommentId++;
     const now = new Date();
 
-    // Get username
     const user = await this.getUser(userId);
     const username = user ? user.username : 'unknown';
 
@@ -509,12 +462,9 @@ export class MemStorage implements IStorage {
     return comment;
   }
 
-  // File storage
   async saveFile(file: Buffer, fileType: string, fileName: string): Promise<string> {
     const filePath = path.join(this.uploadDirectory, fileName);
     await promisify(fs.writeFile)(filePath, file);
-
-    // Return path that can be used to access the file
     return `/uploads/${fileName}`;
   }
 
@@ -522,12 +472,10 @@ export class MemStorage implements IStorage {
     return path.join(this.uploadDirectory, fileName);
   }
 
-  // Método para adicionar dados de demonstração
   async seedDemoData() {
     try {
       console.log("Inicializando dados de demonstração...");
 
-      // Create 5 demo users
       const user1 = await this.createUser({
         username: "naturelover",
         password: "password",
@@ -563,14 +511,12 @@ export class MemStorage implements IStorage {
         profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400"
       });
 
-      // Create some follow relationships
       await this.followUser(user1.id, user2.id);
       await this.followUser(user1.id, user3.id);
       await this.followUser(user2.id, user4.id);
       await this.followUser(user3.id, user5.id);
       await this.followUser(user4.id, user1.id);
 
-      // Nature videos for user1
       await this.createGallery({
         title: "Beautiful Waterfalls",
         description: "Stunning waterfall scenes",
@@ -599,7 +545,6 @@ export class MemStorage implements IStorage {
         }]
       });
 
-      // Urban videos for user2
       await this.createGallery({
         title: "City Lights",
         description: "Night city timelapse",
@@ -628,7 +573,6 @@ export class MemStorage implements IStorage {
         }]
       });
 
-      // Wildlife videos for user3
       await this.createGallery({
         title: "Wild Dolphins",
         description: "Dolphins in their natural habitat",
@@ -643,281 +587,9 @@ export class MemStorage implements IStorage {
         }]
       });
 
-      await this.createGallery({
-        title: "Birds in Flight",
-        description: "Beautiful birds soaring",
-        userId: user3.id,
-        tags: ["wildlife", "birds", "nature"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/467929736/bird-49607.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/961871267-6921dce86e3f76082d76c012c905b4405527e669b0d1f3366e26566bacd0f75e-d",
-          fileType: "video",
-          duration: "0:18"
-        }]
-      });
-
-      // Timelapse videos for user4
-      await this.createGallery({
-        title: "Cloud Movement",
-        description: "Beautiful cloud timelapse",
-        userId: user4.id,
-        tags: ["timelapse", "clouds", "nature"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/385919399/clouds-35516.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/845295531-cb5c691c1ceb5f67f291c5f0bc3f69c73e4bf5b37307a646847ea797ae352d9a-d",
-          fileType: "video",
-          duration: "0:27"
-        }]
-      });
-
-      await this.createGallery({
-        title: "Sunset Colors",
-        description: "Beautiful sunset timelapse",
-        userId: user4.id,
-        tags: ["timelapse", "sunset", "nature"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/490271048/sunset-52915.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/1013408755-7812c01b1da6e1df7e9e0b05e49b0f8c0a05c9e34c62405fb81e50b4d24d7f6f-d",
-          fileType: "video",
-          duration: "0:21"
-        }]
-      });
-
-      // City videos for user5
-      await this.createGallery({
-        title: "Downtown Rush",
-        description: "City traffic and movement",
-        userId: user5.id,
-        tags: ["city", "traffic", "urban"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/529720096/traffic-58024.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/1095994650-66b48ef37967a111665c1ceb4995d004106c8fe26d1f3c5fd70fea4206922f92-d",
-          fileType: "video",
-          duration: "0:24"
-        }]
-      });
-
-      await this.createGallery({
-        title: "Night Life",
-        description: "City at night",
-        userId: user5.id,
-        tags: ["city", "night", "urban"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/474243499/city-50450.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/970483541-64946eb5e91e58a5882bb710cb874cdda16612ef0bece68cc1d2b37ec4ef5b05-d",
-          fileType: "video",
-          duration: "0:19"
-        }]
-      });
-
-      console.log("Dados de demonstração inicializados com sucesso!");
+      console.log("Demo data initialized successfully!");
     } catch (error) {
-      console.error("Erro ao inicializar dados de demonstração:", error);
-    }
-  }
-}
-
-export const storage = new MemStorage();
-        title: "Nature Collection",
-        description: "Beautiful nature scenes from around the world",
-        userId: demoUser2.id,
-        tags: ["nature", "landscape", "photography"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1505144808419-1957a94ca61e",
-            thumbnailUrl: "https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
-            thumbnailUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee",
-            thumbnailUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://pixabay.com/get/g80aa2c5a8690b8d4cf96da8b3bbbc03c5bbfacbe6e5a7ff7fcca22b8b45093f8d6b13abfda42195c4fc6b56f0ae5f714.mp4",
-            thumbnailUrl: "https://i.vimeocdn.com/video/583083388-46d0ce9d987de915110ba48c69c96f2bc6a93d4fc8640dc37968df54539b91bc-d",
-            fileType: "video",
-            duration: "0:30"
-          }
-        ]
-      });
-
-      // Additional Nature Gallery
-      await this.createGallery({
-        title: "Wildlife Moments",
-        description: "Amazing wildlife captures",
-        userId: demoUser2.id,
-        tags: ["wildlife", "nature", "animals"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7",
-            thumbnailUrl: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://pixabay.com/get/g5c95cf11a5c4fa9c5b6c67da40d16c9fcd96c7a31b8fc0ad08ff66c8b37b1bdfc3d2e06da31dbf6d48eb9bf38f5a7f7c.mp4",
-            thumbnailUrl: "https://i.vimeocdn.com/video/746506397-a1cc6c80d99f7815c7a9e2ff0e6f17f7f5c0144e38d1d738ca7bf51bd6463e75-d",
-            fileType: "video",
-            duration: "0:20"
-          }
-        ]
-      });
-
-      // Urban Photography
-      await this.createGallery({
-        title: "Urban Life",
-        description: "City scenes and street photography",
-        userId: demoUser1.id,
-        tags: ["urban", "city", "street"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
-            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://pixabay.com/get/g5d2f06e3dc2c8cac8a897d6d990d1a6895c2e6dd9a3bbd91c8d52ce9aa3f37d9f6dfb5a47b76cb7f688a16c2b3b95d9d.mp4",
-            thumbnailUrl: "https://i.vimeocdn.com/video/723023542-d0fc3488e4b1761b907d76c06ffd769885d63dffee2676c78a76a9764c32edad-d",
-            fileType: "video",
-            duration: "0:15"
-          }
-        ]
-      });
-
-      // Artistic Collection
-      await this.createGallery({
-        title: "Abstract Art",
-        description: "Contemporary abstract photography",
-        userId: demoUser2.id,
-        tags: ["art", "abstract", "contemporary"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8",
-            thumbnailUrl: "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://pixabay.com/get/g72e9c21f7aa4f60e3ef57ce5aebc4bd0b2e05f65ed0d7c4b874ecd2b38bc5b5c1c9edce4be7b2c93ba4a0b3d1ce8c649.mp4",
-            thumbnailUrl: "https://i.vimeocdn.com/video/734556028-5a05fdb043e9aa21baa4c53f8bcc1cc5e8f46f973ad0c1e3ffa49e33f531e744-d",
-            fileType: "video",
-            duration: "0:20"
-          }
-        ]
-      });
-
-      await this.createGallery({
-        title: "City Life",
-        description: "Urban photography and scenes",
-        userId: demoUser1.id,
-        tags: ["city", "urban", "architecture"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
-            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "https://cdn.pixabay.com/vimeo/852750973/sunrise-203678.mp4?width=1280&hash=0c8aa1f4bd9c661c27d5b6c1c078d2ca72f7b6fc",
-            thumbnailUrl: "https://i.vimeocdn.com/video/852750973-d21c671ae0e4b93b1d65dd8b10c98562f466cc22d3cad7e40ef41390da45f1ff-d",
-            fileType: "video",
-            duration: "0:25"
-          },
-          {
-            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
-            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
-            fileType: "image"
-          }
-        ]
-      });
-
-      // Galeria 2 - Com imagens
-      const gallery2 = await this.createGallery({
-        title: "Galeria de Imagens",
-        description: "Uma coleção de imagens de exemplo",
-        userId: demoUser2.id,
-        tags: ["imagens", "fotos", "exemplo"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee",
-            thumbnailUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee?w=400",
-            fileType: "image"
-          },
-          {
-            fileUrl: "/uploads/demo-image-2.jpg",
-            thumbnailUrl: "/uploads/demo-image-2-thumb.jpg",
-            fileType: "image"
-          }
-        ]
-      });
-
-      // Galeria 3
-      await this.createGallery({
-        title: "Conteúdo do Usuário Demo",
-        description: "Galeria criada pelo usuário demo",
-        userId: demoUser1.id,
-        tags: ["usuário", "demo"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "/uploads/demo-image-3.jpg",
-            thumbnailUrl: "/uploads/demo-image-3-thumb.jpg",
-            fileType: "image"
-          }
-        ]
-      });
-
-      // Galeria 4 - Imagens enviadas pelo usuário
-      const gallery4 = await this.createGallery({
-        title: "Imagens do Erome",
-        description: "Imagens que foram enviadas pelo usuário",
-        userId: demoUser1.id,
-        tags: ["erome", "uploads", "exemplos"],
-        visibility: "public",
-        items: [
-          {
-            fileUrl: "/uploads/images/image1.png",
-            thumbnailUrl: "/uploads/images/image1.png",
-            fileType: "image"
-          },
-          {
-            fileUrl: "/uploads/images/image2.jpg",
-            thumbnailUrl: "/uploads/images/image2.jpg",
-            fileType: "image"
-          }
-        ]
-      });
-
-      // Adicionar likes e comentários
-      await this.likeGallery(demoUser1.id, gallery2.id);
-      await this.saveGallery(demoUser1.id, gallery2.id);
-
-      // Likes para a galeria de imagens do Erome
-      await this.likeGallery(demoUser2.id, gallery4.id);
-      await this.saveGallery(demoUser2.id, gallery4.id);
-
-      // Comentários
-      const comment1 = await this.createComment(gallery2.id, demoUser1.id, "Excelente galeria, gostei muito do conteúdo!");
-      await this.createComment(gallery2.id, demoUser2.id, "Obrigado pelo comentário!", comment1.id);
-
-      console.log("Dados de demonstração inicializados com sucesso!");
-    } catch (error) {
-      console.error("Erro ao inicializar dados de demonstração:", error);
+      console.error("Error initializing demo data:", error);
     }
   }
 }

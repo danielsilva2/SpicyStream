@@ -98,9 +98,17 @@ export default function ProfilePage() {
             <div className="p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center">
-                  <div className="h-16 w-16 rounded-full bg-primary-light flex items-center justify-center text-primary text-xl font-bold mr-4">
-                    {profileUser.username.substring(0, 2).toUpperCase()}
-                  </div>
+                  {profileUser.profileImage ? (
+                    <img 
+                      src={profileUser.profileImage} 
+                      alt={`${profileUser.username}'s profile`}
+                      className="h-16 w-16 rounded-full object-cover mr-4"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-primary-light flex items-center justify-center text-primary text-xl font-bold mr-4">
+                      {profileUser.username.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <h1 className="text-2xl font-bold text-neutral-dark">@{profileUser.username}</h1>
                     <div className="flex items-center mt-1">

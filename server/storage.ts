@@ -530,13 +530,15 @@ export class MemStorage implements IStorage {
       const demoUser1 = await this.createUser({
         username: "demo",
         password: "password", // Demo password
-        email: "demo@example.com"
+        email: "demo@example.com",
+        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
       });
 
       const demoUser2 = await this.createUser({
         username: "creator",
         password: "password", // Demo password
-        email: "creator@example.com"
+        email: "creator@example.com",
+        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"
       });
 
       // Criar relações de seguir

@@ -9,25 +9,29 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
-  const { user, isLoading } = useAuth();
+  // Safe handling of auth context
+  let user = null;
+  let isLoading = false;
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    isLoading = auth.isLoading;
+  } catch (error) {
+    console.log("Auth context not available in ProtectedRoute");
+  }
 
-  if (isLoading) {
-    return (
-      <Route path={path}>
+  return (
+    <Route path={path}>
+      {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
           <Loader2 className="h-8 w-8 animate-spin text-border" />
         </div>
-      </Route>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Route path={path}>
+      ) : !user ? (
         <Redirect to="/auth" />
-      </Route>
-    );
-  }
-
-  return <Route path={path} component={Component} />;
+      ) : (
+        <Component />
+      )}
+    </Route>
+  );
 }

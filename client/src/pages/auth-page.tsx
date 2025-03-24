@@ -37,7 +37,20 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
-  const { user, loginMutation, registerMutation } = useAuth();
+  
+  // Safe handling of auth context
+  let user = null;
+  let loginMutation: any = { mutate: () => {}, isPending: false };
+  let registerMutation: any = { mutate: () => {}, isPending: false };
+  
+  try {
+    const auth = useAuth();
+    user = auth.user;
+    loginMutation = auth.loginMutation;
+    registerMutation = auth.registerMutation;
+  } catch (error) {
+    console.log("Auth context not available in AuthPage");
+  }
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -59,15 +72,31 @@ export default function AuthPage() {
   });
 
   function onLoginSubmit(values: LoginFormValues) {
-    loginMutation.mutate({
-      username: values.username,
-      password: values.password,
-    });
+    if (loginMutation) {
+      loginMutation.mutate({
+        username: values.username,
+        password: values.password,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Authentication service unavailable",
+        variant: "destructive",
+      });
+    }
   }
 
   function onRegisterSubmit(values: RegisterFormValues) {
-    const { confirmPassword, terms, ...userData } = values;
-    registerMutation.mutate(userData);
+    if (registerMutation) {
+      const { confirmPassword, terms, ...userData } = values;
+      registerMutation.mutate(userData);
+    } else {
+      toast({
+        title: "Error",
+        description: "Authentication service unavailable",
+        variant: "destructive",
+      });
+    }
   }
 
   useEffect(() => {

@@ -527,34 +527,57 @@ export class MemStorage implements IStorage {
     try {
       console.log("Inicializando dados de demonstração...");
 
-      // Criar usuários de teste com senhas simplificadas para demonstração
       const demoUser1 = await this.createUser({
         username: "demo",
-        password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
+        password: "password", // Demo password
         email: "demo@example.com"
       });
 
       const demoUser2 = await this.createUser({
         username: "creator",
-        password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
+        password: "password", // Demo password
         email: "creator@example.com"
       });
 
       // Criar relações de seguir
       await this.followUser(demoUser1.id, demoUser2.id);
 
-      // Criar galerias com itens
-      // Galeria 1 - Com vídeo
+      // Sample galleries with free content
       await this.createGallery({
-        title: "Vídeo de Demonstração",
-        description: "Este é um vídeo de exemplo para testar a plataforma",
+        title: "Nature Collection",
+        description: "Beautiful nature scenes from around the world",
         userId: demoUser2.id,
-        tags: ["demo", "vídeo", "exemplo"],
+        tags: ["nature", "landscape", "photography"],
         visibility: "public",
         items: [
           {
-            fileUrl: "/uploads/demo-video.mp4",
-            thumbnailUrl: "/uploads/demo-video-thumb.jpg",
+            fileUrl: "https://images.unsplash.com/photo-1505144808419-1957a94ca61e",
+            thumbnailUrl: "https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
+            thumbnailUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400",
+            fileType: "image"
+          }
+        ]
+      });
+
+      await this.createGallery({
+        title: "City Life",
+        description: "Urban photography and scenes",
+        userId: demoUser1.id,
+        tags: ["city", "urban", "architecture"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
+            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://player.vimeo.com/video/76979871",
+            thumbnailUrl: "https://i.vimeocdn.com/video/452001751-a343e6ed9f650bcaa6f4a4577a41e22c9740ef4fb54f3459b99c39471716e759-d?w=400",
             fileType: "video",
             duration: "0:30"
           }

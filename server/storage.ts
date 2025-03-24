@@ -99,6 +99,9 @@ export class MemStorage implements IStorage {
     if (!fs.existsSync(this.uploadDirectory)) {
       fs.mkdirSync(this.uploadDirectory, { recursive: true });
     }
+    
+    // Add demo content
+    this.seedDemoData();
   }
 
   // User operations
@@ -517,6 +520,96 @@ export class MemStorage implements IStorage {
 
   getFilePath(fileName: string): string {
     return path.join(this.uploadDirectory, fileName);
+  }
+  
+  // Método para adicionar dados de demonstração
+  async seedDemoData() {
+    try {
+      console.log("Inicializando dados de demonstração...");
+      
+      // Criar usuários de teste
+      const demoUser1 = await this.createUser({
+        username: "demo",
+        password: "$2b$10$0HNJ.HuVU0lcT1ZmRYtvZeoPqEU7bzH/yJmlmRuU9RR.BN7ZRJC8y", // "password"
+        email: "demo@example.com"
+      });
+      
+      const demoUser2 = await this.createUser({
+        username: "creator",
+        password: "$2b$10$0HNJ.HuVU0lcT1ZmRYtvZeoPqEU7bzH/yJmlmRuU9RR.BN7ZRJC8y", // "password"
+        email: "creator@example.com"
+      });
+
+      // Criar relações de seguir
+      await this.followUser(demoUser1.id, demoUser2.id);
+      
+      // Criar galerias com itens
+      // Galeria 1 - Com vídeo
+      await this.createGallery({
+        title: "Vídeo de Demonstração",
+        description: "Este é um vídeo de exemplo para testar a plataforma",
+        userId: demoUser2.id,
+        tags: ["demo", "vídeo", "exemplo"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "/uploads/demo-video.mp4",
+            thumbnailUrl: "/uploads/demo-video-thumb.jpg",
+            fileType: "video",
+            duration: "0:30"
+          }
+        ]
+      });
+      
+      // Galeria 2 - Com imagens
+      const gallery2 = await this.createGallery({
+        title: "Galeria de Imagens",
+        description: "Uma coleção de imagens de exemplo",
+        userId: demoUser2.id,
+        tags: ["imagens", "fotos", "exemplo"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "/uploads/demo-image-1.jpg",
+            thumbnailUrl: "/uploads/demo-image-1-thumb.jpg",
+            fileType: "image"
+          },
+          {
+            fileUrl: "/uploads/demo-image-2.jpg",
+            thumbnailUrl: "/uploads/demo-image-2-thumb.jpg",
+            fileType: "image"
+          }
+        ]
+      });
+      
+      // Galeria 3
+      await this.createGallery({
+        title: "Conteúdo do Usuário Demo",
+        description: "Galeria criada pelo usuário demo",
+        userId: demoUser1.id,
+        tags: ["usuário", "demo"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "/uploads/demo-image-3.jpg",
+            thumbnailUrl: "/uploads/demo-image-3-thumb.jpg",
+            fileType: "image"
+          }
+        ]
+      });
+      
+      // Adicionar likes e comentários
+      await this.likeGallery(demoUser1.id, gallery2.id);
+      await this.saveGallery(demoUser1.id, gallery2.id);
+      
+      // Comentários
+      const comment1 = await this.createComment(gallery2.id, demoUser1.id, "Excelente galeria, gostei muito do conteúdo!");
+      await this.createComment(gallery2.id, demoUser2.id, "Obrigado pelo comentário!", comment1.id);
+      
+      console.log("Dados de demonstração inicializados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao inicializar dados de demonstração:", error);
+    }
   }
 }
 

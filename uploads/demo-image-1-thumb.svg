@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#e74c3c" />
+  <text x="200" y="150" font-family="Arial" font-size="24" text-anchor="middle" fill="white">Demo Image 1</text>
+  <text x="200" y="180" font-family="Arial" font-size="14" text-anchor="middle" fill="white">Thumbnail</text>
+</svg>

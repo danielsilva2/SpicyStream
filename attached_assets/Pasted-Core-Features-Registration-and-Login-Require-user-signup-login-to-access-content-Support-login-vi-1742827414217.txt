@@ -1,0 +1,63 @@
+Core Features:
+
+Registration and Login
+Require user signup/login to access content.
+Support login via Google, Reddit, Twitter, or email/password (username, password, optional email).
+Redirect unauthenticated users to the login page unless accessing a direct content link.
+User Interface
+Simple, clean layout with a red color scheme (replace Erome’s pink with shades of red, e.g., #FF0000 for primary elements).
+Navigation menu: "Home", "Feed", "Saved", "Profile", "Upload", "Settings".
+Grid-based thumbnail display for content (large previews with titles and view counts).
+Personalized Feed
+Display content only from followed users in the "Feed" section.
+Allow following/unfollowing users from the feed or content pages.
+Content Upload
+Enable upload of images (JPG, PNG) and videos (MP4).
+Processing step after upload (simulate encoding with a progress bar).
+Add title, description, and tags; set visibility (public or private).
+Content Galleries
+Group uploads into galleries (albums) with a title.
+Display images full-size by default; embed a video player for videos (autoplay disabled).
+No slideshow or arrow-key navigation (match Erome’s simplicity).
+Interaction Features
+Like and comment on content.
+Save content to a "Saved" section (removable).
+Generate shareable direct links.
+Add a "Report" button for moderation.
+User Profiles
+Show uploaded content, follower count, and following status.
+Allow external links in content descriptions (e.g., social media).
+Mobile-First Design
+Optimize for mobile with swipe navigation for images and fast video playback.
+Responsive grid adjusts to screen size (smaller thumbnails on mobile).
+Ensure single-hand usability (buttons and menus thumb-accessible).
+Security and Performance
+Use HTTPS (Replit’s default domain supports this).
+Private content restricted to authorized users.
+Fast-loading media with minimal buffering.
+Database and Storage
+Use Replit’s built-in database (e.g., Replit DB) or SQLite for user data (profiles, follows, likes).
+Store uploaded files in a cloud-like structure within Replit (e.g., file system or external storage like AWS S3 if Replit limits are exceeded).
+Track metadata (file type, visibility, uploader, tags) in the database.
+Technical Requirements:
+
+Front-End: HTML, CSS (red-themed, mobile-first), JavaScript (for interactivity and dynamic content).
+Back-End: Node.js with Express (Replit-friendly) to handle routing, authentication, and file uploads.
+Database: SQLite or Replit DB for user/content metadata; file system or external storage for media.
+File Handling: Multer (Node.js) for uploads, with basic processing simulation (e.g., delay).
+Responsive Design: CSS media queries and flexbox/grid for adaptability.
+Security: Basic authentication (JWT or sessions), input sanitization, and HTTPS.
+Development Steps on Replit:
+
+Set up a Node.js project in Replit.
+Install dependencies: express, multer, sqlite3 (or use Replit DB), jsonwebtoken (for auth).
+Create file structure: /public (CSS, JS, red-themed assets), /uploads (media storage), /routes (API endpoints).
+Build core pages (login, home, feed, profile, upload) with red styling.
+Implement authentication and database for users/content.
+Add upload functionality with file storage and metadata tracking.
+Test responsiveness on mobile and desktop views.
+Notes:
+
+Ensure the site loads fast despite Replit’s resource limits (consider compressing uploads).
+Keep the codebase modular for easy debugging in Replit’s single-project environment.
+Test with sample uploads (small images/videos) to verify storage and playback.

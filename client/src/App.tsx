@@ -22,8 +22,10 @@ function Router() {
       {/* Rotas protegidas - exigem login */}
       <ProtectedRoute path="/feed" component={FeedPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
-      <ProtectedRoute path="/profile/:username?" component={ProfilePage} />
       <ProtectedRoute path="/upload" component={UploadPage} />
+      
+      {/* Profile page is now public */}
+      <Route path="/profile/:username?" component={ProfilePage} />
 
       <Route component={NotFound} />
     </Switch>

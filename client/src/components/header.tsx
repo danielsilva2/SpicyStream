@@ -50,9 +50,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
+            <a href="/" className="flex-shrink-0 flex items-center cursor-pointer">
               <span className="text-primary text-2xl font-bold">RedShare</span>
-            </Link>
+            </a>
             {/* Desktop Navigation */}
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
               {navigation.map((item) => (

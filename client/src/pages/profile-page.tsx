@@ -13,7 +13,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function ProfilePage() {
   const { username } = useParams<{ username?: string }>();
   const { user: currentUser } = useAuth();
-  const targetUsername = username || currentUser?.username;
+  const targetUsername = username;
   
   const { data: profileUser, isLoading: isLoadingUser } = useQuery<User>({
     queryKey: [`/api/users/${targetUsername}`],

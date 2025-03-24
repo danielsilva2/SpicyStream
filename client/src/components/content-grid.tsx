@@ -7,34 +7,24 @@ interface ContentGridProps {
 }
 
 export default function ContentGrid({ content: initialContent }: ContentGridProps) {
-  const [content, setContent] = useState(initialContent);
-  const [offset, setOffset] = useState(initialContent.length);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [displayedContent, setDisplayedContent] = useState<Content[]>(initialContent);
+  const [visibleItems, setVisibleItems] = useState(8);
 
-  const loadMore = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/content?offset=${offset}&limit=20`);
-      const newContent = await response.json();
+  useEffect(() => {
+    setDisplayedContent(initialContent);
+  }, [initialContent]);
 
-      if (newContent.length === 0) {
-        setHasMore(false);
-      } else {
-        setContent([...content, ...newContent]);
-        setOffset(offset + newContent.length);
-      }
-    } catch (error) {
-      console.error('Failed to load more content:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadMore = () => {
+    setVisibleItems(prev => prev + 8);
   };
+
+  const visibleContent = displayedContent.slice(0, visibleItems);
+  const hasMore = visibleItems < displayedContent.length;
 
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {content.map((item) => (
+        {visibleContent.map((item) => (
           <ContentCard key={item.id} content={item} />
         ))}
       </div>

@@ -411,17 +411,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const tempVideoPath = path.join(uploadsDir, fileName);
           await promisify(fs.writeFile)(tempVideoPath, file.buffer);
           
-          // Extract thumbnail using ffmpeg
+          // Extract thumbnail using ffmpeg with absolute paths
           await new Promise((resolve, reject) => {
             ffmpeg(tempVideoPath)
-              .screenshots({
-                timestamps: ['1'],
+              .on('end', resolve)
+              .on('error', reject)
+              .takeScreenshots({
+                count: 1,
+                timemarks: ['00:00:01'],
                 filename: thumbnailName,
                 folder: uploadsDir,
                 size: '400x225'
-              })
-              .on('end', resolve)
-              .on('error', reject);
+              });
           });
           
           // Read the generated thumbnail

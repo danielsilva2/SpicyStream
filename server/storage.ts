@@ -576,10 +576,15 @@ export class MemStorage implements IStorage {
             fileType: "image"
           },
           {
-            fileUrl: "https://player.vimeo.com/video/76979871",
-            thumbnailUrl: "https://i.vimeocdn.com/video/452001751-a343e6ed9f650bcaa6f4a4577a41e22c9740ef4fb54f3459b99c39471716e759-d?w=400",
+            fileUrl: "https://player.vimeo.com/video/203678",
+            thumbnailUrl: "https://i.vimeocdn.com/video/619594709-5c1f6b3075e9c42142d1614d3b6853b3",
             fileType: "video",
-            duration: "0:30"
+            duration: "0:25"
+          },
+          {
+            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
+            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
+            fileType: "image"
           }
         ]
       });

@@ -23,6 +23,8 @@ export default function ProfilePage() {
   const { data: userContent, isLoading: isLoadingContent } = useQuery<Content[]>({
     queryKey: [`/api/users/${targetUsername}/content`],
     enabled: !!targetUsername,
+    refetchOnMount: true,
+    staleTime: 0
   });
   
   const followMutation = useMutation({

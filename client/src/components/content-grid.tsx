@@ -8,14 +8,19 @@ interface ContentGridProps {
 
 export default function ContentGrid({ content: initialContent }: ContentGridProps) {
   const [displayedContent, setDisplayedContent] = useState<Content[]>(initialContent);
-  const [visibleItems, setVisibleItems] = useState(8);
+  const [visibleItems, setVisibleItems] = useState(12);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setDisplayedContent(initialContent);
   }, [initialContent]);
 
   const loadMore = () => {
-    setVisibleItems(prev => prev + 8);
+    setLoading(true);
+    setTimeout(() => {
+      setVisibleItems(prev => prev + 12);
+      setLoading(false);
+    }, 500);
   };
 
   const visibleContent = displayedContent.slice(0, visibleItems);

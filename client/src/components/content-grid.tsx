@@ -1,7 +1,7 @@
 
 import { Content } from "@shared/schema";
 import ContentCard from "./content-card";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ContentGridProps {
   content: Content[];
@@ -9,6 +9,11 @@ interface ContentGridProps {
 
 export default function ContentGrid({ content }: ContentGridProps) {
   const [visibleItems, setVisibleItems] = useState(8);
+  const [displayedContent, setDisplayedContent] = useState<Content[]>([]);
+
+  useEffect(() => {
+    setDisplayedContent(content?.slice(0, visibleItems) || []);
+  }, [content, visibleItems]);
   
   const loadMore = () => {
     setVisibleItems(prev => prev + 8);
@@ -22,8 +27,6 @@ export default function ContentGrid({ content }: ContentGridProps) {
     );
   }
 
-  const displayedContent = content.slice(0, visibleItems);
-
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -32,7 +35,7 @@ export default function ContentGrid({ content }: ContentGridProps) {
         ))}
       </div>
       
-      {visibleItems < content.length && (
+      {content && visibleItems < content.length && (
         <div className="mt-8 flex justify-center">
           <button 
             onClick={loadMore}

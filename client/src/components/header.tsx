@@ -15,11 +15,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export default function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   // Tratamento seguro para o caso de o AuthProvider não estar disponível
   let user = null;
   let logoutMutation = { mutate: () => {}, isPending: false };
-  
+
   try {
     const auth = useAuth();
     user = auth.user;
@@ -28,12 +28,12 @@ export default function Header() {
     // Se o useAuth falhar, manteremos user como null
     console.log("Auth context not available");
   }
-  
+
   // Navegação básica (disponível para todos)
   const baseNavigation = [
     { name: "Home", href: "/", current: location === "/" },
   ];
-  
+
   // Navegação para usuários autenticados
   const authNavigation = user ? [
     ...baseNavigation,
@@ -41,10 +41,10 @@ export default function Header() {
     { name: "Saved", href: "/saved", current: location === "/saved" },
     { name: "Profile", href: `/profile/${user?.username}`, current: location.startsWith("/profile") },
   ] : baseNavigation;
-  
+
   // Escolha qual navegação exibir com base no status de autenticação
   const navigation = user ? authNavigation : baseNavigation;
-  
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,7 +70,7 @@ export default function Header() {
               ))}
             </nav>
           </div>
-          
+
           {/* Desktop Right Nav */}
           <div className="hidden md:flex items-center">
             {user ? (
@@ -81,7 +81,7 @@ export default function Header() {
                     <Upload className="h-4 w-4 mr-2" /> Upload
                   </Button>
                 </Link>
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger className="ml-4">
                     <div className="h-8 w-8 rounded-full bg-primary-light flex items-center justify-center text-primary">
@@ -121,7 +121,7 @@ export default function Header() {
               </Link>
             )}
           </div>
-          
+
           {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -132,7 +132,7 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="left">
                 <div className="flex flex-col h-full py-6">
-                  <div className="text-primary text-2xl font-bold mb-6">RedShare</div>
+                  <Link href="/" className="text-primary text-2xl font-bold mb-6 hover:opacity-80">RedShare</Link>
                   <nav className="flex-1 space-y-1">
                     {navigation.map((item) => (
                       <Link
@@ -148,7 +148,7 @@ export default function Header() {
                         {item.name}
                       </Link>
                     ))}
-                    
+
                     {user && (
                       <Link
                         href="/settings"
@@ -159,7 +159,7 @@ export default function Header() {
                       </Link>
                     )}
                   </nav>
-                  
+
                   <div className="pt-4 mt-auto">
                     {user ? (
                       // Botão de logout para usuários autenticados

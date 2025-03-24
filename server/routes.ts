@@ -146,13 +146,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user content
       const userContent = await storage.getUserGalleries(user.id);
       
-      // Filter private content if not the owner
-      const filteredContent = req.user?.id === user.id 
-        ? userContent 
-        : userContent.filter(item => {
-            const gallery = storage.getGalleryById(item.id);
-            return gallery && gallery.visibility === 'public';
-          });
+      // Only show public content for non-owners
+      const filteredContent = userContent.filter(item => {
+        const gallery = storage.getGalleryById(item.id);
+        return gallery && gallery.visibility === 'public';
+      });
       
       // Apply pagination
       const paginatedContent = filteredContent.slice(offset, offset + limit);

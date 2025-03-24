@@ -1,5 +1,4 @@
 import { Content } from "@shared/schema";
-import ContentCard from "./content-card";
 import { useState, useEffect } from 'react';
 import { Link } from "wouter";
 
@@ -34,18 +33,27 @@ export default function ContentGrid({ content: initialContent }: ContentGridProp
           <Link key={item.id} href={`/gallery/${item.id}`}>
             <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
               <div className="relative pb-[56.25%]">
-                <img 
-                  src={item.thumbnailUrl || '/placeholder.jpg'} 
-                  alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder.jpg';
-                  }}
-                />
-                {item.fileType === 'video' && (
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 px-2 py-1 rounded text-xs text-white">
-                    {item.duration || '0:00'}
+                {item.thumbnailUrl ? (
+                  <img 
+                    src={item.thumbnailUrl}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://placehold.co/400x225?text=No+Preview';
+                    }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+                    <span className="text-gray-400">No preview available</span>
+                  </div>
+                )}
+                {item.fileType === 'video' && item.duration && (
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                    </svg>
+                    {item.duration}
                   </div>
                 )}
               </div>

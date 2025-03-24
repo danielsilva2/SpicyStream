@@ -527,24 +527,199 @@ export class MemStorage implements IStorage {
     try {
       console.log("Inicializando dados de demonstração...");
 
-      const demoUser1 = await this.createUser({
-        username: "demo",
-        password: "password", // Demo password
-        email: "demo@example.com",
+      // Create 5 demo users
+      const user1 = await this.createUser({
+        username: "naturelover",
+        password: "password",
+        email: "nature@example.com",
         profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
       });
 
-      const demoUser2 = await this.createUser({
-        username: "creator",
-        password: "password", // Demo password
-        email: "creator@example.com",
+      const user2 = await this.createUser({
+        username: "urbanexplorer",
+        password: "password",
+        email: "urban@example.com",
         profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"
       });
 
-      // Criar relações de seguir
-      await this.followUser(demoUser1.id, demoUser2.id);
+      const user3 = await this.createUser({
+        username: "wildlifepro",
+        password: "password",
+        email: "wildlife@example.com",
+        profileImage: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=400"
+      });
 
-      // Sample galleries with free content
+      const user4 = await this.createUser({
+        username: "timelapse",
+        password: "password",
+        email: "time@example.com",
+        profileImage: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400"
+      });
+
+      const user5 = await this.createUser({
+        username: "cityscaper",
+        password: "password",
+        email: "city@example.com",
+        profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400"
+      });
+
+      // Create some follow relationships
+      await this.followUser(user1.id, user2.id);
+      await this.followUser(user1.id, user3.id);
+      await this.followUser(user2.id, user4.id);
+      await this.followUser(user3.id, user5.id);
+      await this.followUser(user4.id, user1.id);
+
+      // Nature videos for user1
+      await this.createGallery({
+        title: "Beautiful Waterfalls",
+        description: "Stunning waterfall scenes",
+        userId: user1.id,
+        tags: ["nature", "water", "relaxing"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/328890111/waterfall-23881.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/774667835-6769e9ffd8f8d5cf44f97bd8f63050127e35f191d4dfb2d060870170806e6c0e-d",
+          fileType: "video",
+          duration: "0:31"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Ocean Waves",
+        description: "Relaxing ocean scenes",
+        userId: user1.id,
+        tags: ["nature", "ocean", "waves"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/178058381/ocean-4006.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/585731720-8c45d35d11dde0feb999b5c6505b7342326b7681991f449285df5bf38e27b8f4-d",
+          fileType: "video",
+          duration: "0:42"
+        }]
+      });
+
+      // Urban videos for user2
+      await this.createGallery({
+        title: "City Lights",
+        description: "Night city timelapse",
+        userId: user2.id,
+        tags: ["urban", "night", "timelapse"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/414670315/city-40862.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/887059150-89145b318d43959e56b83f8f7829c5c58fb5eec6d37faa6a3b51a23adde25a0e-d",
+          fileType: "video",
+          duration: "0:20"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Urban Motion",
+        description: "City life in motion",
+        userId: user2.id,
+        tags: ["urban", "people", "life"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/443401203/traffic-46340.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/927956336-016e932a7437e5978593dd1ff9a5250662408a297d43e57c3c73ee2dd8506cfc-d",
+          fileType: "video",
+          duration: "0:15"
+        }]
+      });
+
+      // Wildlife videos for user3
+      await this.createGallery({
+        title: "Wild Dolphins",
+        description: "Dolphins in their natural habitat",
+        userId: user3.id,
+        tags: ["wildlife", "ocean", "dolphins"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/457670133/dolphins-47947.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/947994582-e9264c472e46c0bb470b67751879a12fb2ea95f8614e94553cadded4cf80b2c5-d",
+          fileType: "video",
+          duration: "0:23"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Birds in Flight",
+        description: "Beautiful birds soaring",
+        userId: user3.id,
+        tags: ["wildlife", "birds", "nature"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/467929736/bird-49607.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/961871267-6921dce86e3f76082d76c012c905b4405527e669b0d1f3366e26566bacd0f75e-d",
+          fileType: "video",
+          duration: "0:18"
+        }]
+      });
+
+      // Timelapse videos for user4
+      await this.createGallery({
+        title: "Cloud Movement",
+        description: "Beautiful cloud timelapse",
+        userId: user4.id,
+        tags: ["timelapse", "clouds", "nature"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/385919399/clouds-35516.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/845295531-cb5c691c1ceb5f67f291c5f0bc3f69c73e4bf5b37307a646847ea797ae352d9a-d",
+          fileType: "video",
+          duration: "0:27"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Sunset Colors",
+        description: "Beautiful sunset timelapse",
+        userId: user4.id,
+        tags: ["timelapse", "sunset", "nature"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/490271048/sunset-52915.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/1013408755-7812c01b1da6e1df7e9e0b05e49b0f8c0a05c9e34c62405fb81e50b4d24d7f6f-d",
+          fileType: "video",
+          duration: "0:21"
+        }]
+      });
+
+      // City videos for user5
+      await this.createGallery({
+        title: "Downtown Rush",
+        description: "City traffic and movement",
+        userId: user5.id,
+        tags: ["city", "traffic", "urban"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/529720096/traffic-58024.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/1095994650-66b48ef37967a111665c1ceb4995d004106c8fe26d1f3c5fd70fea4206922f92-d",
+          fileType: "video",
+          duration: "0:24"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Night Life",
+        description: "City at night",
+        userId: user5.id,
+        tags: ["city", "night", "urban"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://cdn.pixabay.com/vimeo/474243499/city-50450.mp4",
+          thumbnailUrl: "https://i.vimeocdn.com/video/970483541-64946eb5e91e58a5882bb710cb874cdda16612ef0bece68cc1d2b37ec4ef5b05-d",
+          fileType: "video",
+          duration: "0:19"
+        }]
+      });
+
+      console.log("Dados de demonstração inicializados com sucesso!");
+    } catch (error) {
+      console.error("Erro ao inicializar dados de demonstração:", error);
+    }
+  }
       await this.createGallery({
         title: "Nature Collection",
         description: "Beautiful nature scenes from around the world",

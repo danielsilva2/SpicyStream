@@ -16,13 +16,13 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Follow operations
   followUser(followerId: number, followingId: number): Promise<void>;
   unfollowUser(followerId: number, followingId: number): Promise<void>;
   isFollowing(followerId: number, followingId: number): Promise<boolean>;
   getFollowersCount(userId: number): Promise<number>;
-  
+
   // Content & Gallery operations
   createGallery(gallery: any): Promise<Gallery>;
   getGalleryById(id: number): Promise<Gallery | undefined>;
@@ -32,7 +32,7 @@ export interface IStorage {
   getSavedContent(userId: number, limit?: number, offset?: number): Promise<Content[]>;
   incrementViewCount(galleryId: number): Promise<void>;
   getUserContentCount(userId: number): Promise<number>;
-  
+
   // Interactions
   likeGallery(userId: number, galleryId: number): Promise<void>;
   unlikeGallery(userId: number, galleryId: number): Promise<void>;
@@ -40,11 +40,11 @@ export interface IStorage {
   saveGallery(userId: number, galleryId: number): Promise<void>;
   unsaveGallery(userId: number, galleryId: number): Promise<void>;
   isGallerySaved(userId: number, galleryId: number): Promise<boolean>;
-  
+
   // Comments
   getComments(galleryId: number): Promise<Comment[]>;
   createComment(galleryId: number, userId: number, text: string, parentId?: number): Promise<Comment>;
-  
+
   // File storage
   saveFile(file: Buffer, fileType: string, fileName: string): Promise<string>;
   getFilePath(fileName: string): string;
@@ -58,7 +58,7 @@ export class MemStorage implements IStorage {
   private likesData: Map<number, { userId: number; galleryId: number }>;
   private savesData: Map<number, { userId: number; galleryId: number }>;
   private commentsData: Map<number, Comment>;
-  
+
   sessionStore: session.SessionStore;
   currentUserId: number;
   currentGalleryId: number;
@@ -67,7 +67,7 @@ export class MemStorage implements IStorage {
   currentLikeId: number;
   currentSaveId: number;
   currentCommentId: number;
-  
+
   uploadDirectory: string;
 
   constructor() {
@@ -79,7 +79,7 @@ export class MemStorage implements IStorage {
     this.likesData = new Map();
     this.savesData = new Map();
     this.commentsData = new Map();
-    
+
     // Initialize auto-increment IDs
     this.currentUserId = 1;
     this.currentGalleryId = 1;
@@ -88,18 +88,18 @@ export class MemStorage implements IStorage {
     this.currentLikeId = 1;
     this.currentSaveId = 1;
     this.currentCommentId = 1;
-    
+
     // Set up session store
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
-    
+
     // Set up upload directory
     this.uploadDirectory = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(this.uploadDirectory)) {
       fs.mkdirSync(this.uploadDirectory, { recursive: true });
     }
-    
+
     // Add demo content
     this.seedDemoData();
   }
@@ -108,11 +108,11 @@ export class MemStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const user = this.usersData.get(id);
     if (!user) return undefined;
-    
+
     // Add additional calculated fields
     const followersCount = await this.getFollowersCount(id);
     const contentCount = await this.getUserContentCount(id);
-    
+
     return { ...user, followersCount, contentCount };
   }
 
@@ -120,13 +120,13 @@ export class MemStorage implements IStorage {
     const user = Array.from(this.usersData.values()).find(
       (user) => user.username.toLowerCase() === username.toLowerCase()
     );
-    
+
     if (!user) return undefined;
-    
+
     // Add additional calculated fields
     const followersCount = await this.getFollowersCount(user.id);
     const contentCount = await this.getUserContentCount(user.id);
-    
+
     return { ...user, followersCount, contentCount };
   }
 
@@ -148,7 +148,7 @@ export class MemStorage implements IStorage {
     // Check if already following
     const isAlreadyFollowing = await this.isFollowing(followerId, followingId);
     if (isAlreadyFollowing) return;
-    
+
     const id = this.currentFollowId++;
     this.followsData.set(id, { 
       followerId, 
@@ -160,7 +160,7 @@ export class MemStorage implements IStorage {
     const follow = Array.from(this.followsData.entries()).find(
       ([_, f]) => f.followerId === followerId && f.followingId === followingId
     );
-    
+
     if (follow) {
       this.followsData.delete(follow[0]);
     }
@@ -182,7 +182,7 @@ export class MemStorage implements IStorage {
   async createGallery(galleryData: any): Promise<Gallery> {
     const id = this.currentGalleryId++;
     const now = new Date();
-    
+
     const gallery: Gallery = {
       id,
       title: galleryData.title,
@@ -197,15 +197,15 @@ export class MemStorage implements IStorage {
       username: '', // Will be filled in
       items: []     // Will be populated with content items
     };
-    
+
     // Get username and add it to gallery
     const user = await this.getUser(galleryData.userId);
     if (user) {
       gallery.username = user.username;
     }
-    
+
     this.galleriesData.set(id, gallery);
-    
+
     // Add content items if provided
     if (galleryData.items && Array.isArray(galleryData.items)) {
       for (const item of galleryData.items) {
@@ -220,27 +220,27 @@ export class MemStorage implements IStorage {
           duration: item.duration || null,
           createdAt: now.toISOString()
         };
-        
+
         this.contentItemsData.set(contentId, contentItem);
         gallery.items.push(contentItem);
       }
     }
-    
+
     return gallery;
   }
 
   async getGalleryById(id: number): Promise<Gallery | undefined> {
     const gallery = this.galleriesData.get(id);
     if (!gallery) return undefined;
-    
+
     // Get items for this gallery
     const items = Array.from(this.contentItemsData.values()).filter(
       (item) => item.galleryId === id
     );
-    
+
     // Add items to gallery
     gallery.items = items;
-    
+
     return gallery;
   }
 
@@ -248,7 +248,7 @@ export class MemStorage implements IStorage {
     const userGalleries = Array.from(this.galleriesData.values())
       .filter((gallery) => gallery.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     // Convert galleries to content format
     return userGalleries.map(gallery => {
       // Get the first item for the thumbnail
@@ -258,7 +258,7 @@ export class MemStorage implements IStorage {
         thumbnailUrl: '',
         fileType: 'image'
       };
-      
+
       return {
         id: gallery.id,
         title: gallery.title,
@@ -275,7 +275,7 @@ export class MemStorage implements IStorage {
   async getAllContent(limit = 20, offset = 0, sortBy = 'recent'): Promise<Content[]> {
     let galleries = Array.from(this.galleriesData.values())
       .filter(gallery => gallery.visibility === 'public');
-    
+
     // Apply sorting
     if (sortBy === 'popular') {
       galleries = galleries.sort((a, b) => {
@@ -289,10 +289,10 @@ export class MemStorage implements IStorage {
       // Default to recent
       galleries = galleries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
-    
+
     // Apply pagination
     galleries = galleries.slice(offset, offset + limit);
-    
+
     // Convert galleries to content format
     return galleries.map(gallery => {
       // Get the first item for the thumbnail
@@ -302,11 +302,11 @@ export class MemStorage implements IStorage {
         thumbnailUrl: '',
         fileType: 'image'
       };
-      
+
       // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
-      
+
       return {
         id: gallery.id,
         title: gallery.title,
@@ -325,15 +325,15 @@ export class MemStorage implements IStorage {
     const followingIds = Array.from(this.followsData.values())
       .filter(follow => follow.followerId === userId)
       .map(follow => follow.followingId);
-    
+
     // Get galleries from those users
     let feedGalleries = Array.from(this.galleriesData.values())
       .filter(gallery => followingIds.includes(gallery.userId) && gallery.visibility === 'public')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     // Apply pagination
     feedGalleries = feedGalleries.slice(offset, offset + limit);
-    
+
     // Convert galleries to content format
     return feedGalleries.map(gallery => {
       // Get the first item for the thumbnail
@@ -343,11 +343,11 @@ export class MemStorage implements IStorage {
         thumbnailUrl: '',
         fileType: 'image'
       };
-      
+
       // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
-      
+
       return {
         id: gallery.id,
         title: gallery.title,
@@ -366,15 +366,15 @@ export class MemStorage implements IStorage {
     const savedGalleryIds = Array.from(this.savesData.values())
       .filter(save => save.userId === userId)
       .map(save => save.galleryId);
-    
+
     // Get galleries that the user has saved
     let savedGalleries = Array.from(this.galleriesData.values())
       .filter(gallery => savedGalleryIds.includes(gallery.id))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     // Apply pagination
     savedGalleries = savedGalleries.slice(offset, offset + limit);
-    
+
     // Convert galleries to content format
     return savedGalleries.map(gallery => {
       // Get the first item for the thumbnail
@@ -384,11 +384,11 @@ export class MemStorage implements IStorage {
         thumbnailUrl: '',
         fileType: 'image'
       };
-      
+
       // Get the username
       const user = this.usersData.get(gallery.userId);
       const username = user ? user.username : 'unknown';
-      
+
       return {
         id: gallery.id,
         title: gallery.title,
@@ -421,7 +421,7 @@ export class MemStorage implements IStorage {
     // Check if already liked
     const isAlreadyLiked = await this.isGalleryLiked(userId, galleryId);
     if (isAlreadyLiked) return;
-    
+
     const id = this.currentLikeId++;
     this.likesData.set(id, { userId, galleryId });
   }
@@ -430,7 +430,7 @@ export class MemStorage implements IStorage {
     const like = Array.from(this.likesData.entries()).find(
       ([_, l]) => l.userId === userId && l.galleryId === galleryId
     );
-    
+
     if (like) {
       this.likesData.delete(like[0]);
     }
@@ -446,7 +446,7 @@ export class MemStorage implements IStorage {
     // Check if already saved
     const isAlreadySaved = await this.isGallerySaved(userId, galleryId);
     if (isAlreadySaved) return;
-    
+
     const id = this.currentSaveId++;
     this.savesData.set(id, { userId, galleryId });
   }
@@ -455,7 +455,7 @@ export class MemStorage implements IStorage {
     const save = Array.from(this.savesData.entries()).find(
       ([_, s]) => s.userId === userId && s.galleryId === galleryId
     );
-    
+
     if (save) {
       this.savesData.delete(save[0]);
     }
@@ -473,28 +473,28 @@ export class MemStorage implements IStorage {
     const rootComments = Array.from(this.commentsData.values())
       .filter(comment => comment.galleryId === galleryId && !comment.parentId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     // Get all replies
     const replies = Array.from(this.commentsData.values())
       .filter(comment => comment.galleryId === galleryId && !!comment.parentId)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    
+
     // Organize replies by parent
     for (const rootComment of rootComments) {
       rootComment.replies = replies.filter(reply => reply.parentId === rootComment.id);
     }
-    
+
     return rootComments;
   }
 
   async createComment(galleryId: number, userId: number, text: string, parentId?: number): Promise<Comment> {
     const id = this.currentCommentId++;
     const now = new Date();
-    
+
     // Get username
     const user = await this.getUser(userId);
     const username = user ? user.username : 'unknown';
-    
+
     const comment: Comment = {
       id,
       galleryId,
@@ -504,7 +504,7 @@ export class MemStorage implements IStorage {
       createdAt: now.toISOString(),
       parentId
     };
-    
+
     this.commentsData.set(id, comment);
     return comment;
   }
@@ -513,7 +513,7 @@ export class MemStorage implements IStorage {
   async saveFile(file: Buffer, fileType: string, fileName: string): Promise<string> {
     const filePath = path.join(this.uploadDirectory, fileName);
     await promisify(fs.writeFile)(filePath, file);
-    
+
     // Return path that can be used to access the file
     return `/uploads/${fileName}`;
   }
@@ -521,19 +521,19 @@ export class MemStorage implements IStorage {
   getFilePath(fileName: string): string {
     return path.join(this.uploadDirectory, fileName);
   }
-  
+
   // Método para adicionar dados de demonstração
   async seedDemoData() {
     try {
       console.log("Inicializando dados de demonstração...");
-      
+
       // Criar usuários de teste com senhas simplificadas para demonstração
       const demoUser1 = await this.createUser({
         username: "demo",
         password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
         email: "demo@example.com"
       });
-      
+
       const demoUser2 = await this.createUser({
         username: "creator",
         password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
@@ -542,7 +542,7 @@ export class MemStorage implements IStorage {
 
       // Criar relações de seguir
       await this.followUser(demoUser1.id, demoUser2.id);
-      
+
       // Criar galerias com itens
       // Galeria 1 - Com vídeo
       await this.createGallery({
@@ -560,7 +560,7 @@ export class MemStorage implements IStorage {
           }
         ]
       });
-      
+
       // Galeria 2 - Com imagens
       const gallery2 = await this.createGallery({
         title: "Galeria de Imagens",
@@ -581,7 +581,7 @@ export class MemStorage implements IStorage {
           }
         ]
       });
-      
+
       // Galeria 3
       await this.createGallery({
         title: "Conteúdo do Usuário Demo",
@@ -597,7 +597,7 @@ export class MemStorage implements IStorage {
           }
         ]
       });
-      
+
       // Galeria 4 - Imagens enviadas pelo usuário
       const gallery4 = await this.createGallery({
         title: "Imagens do Erome",
@@ -618,19 +618,19 @@ export class MemStorage implements IStorage {
           }
         ]
       });
-      
+
       // Adicionar likes e comentários
       await this.likeGallery(demoUser1.id, gallery2.id);
       await this.saveGallery(demoUser1.id, gallery2.id);
-      
+
       // Likes para a galeria de imagens do Erome
       await this.likeGallery(demoUser2.id, gallery4.id);
       await this.saveGallery(demoUser2.id, gallery4.id);
-      
+
       // Comentários
       const comment1 = await this.createComment(gallery2.id, demoUser1.id, "Excelente galeria, gostei muito do conteúdo!");
       await this.createComment(gallery2.id, demoUser2.id, "Obrigado pelo comentário!", comment1.id);
-      
+
       console.log("Dados de demonstração inicializados com sucesso!");
     } catch (error) {
       console.error("Erro ao inicializar dados de demonstração:", error);

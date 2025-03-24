@@ -559,6 +559,83 @@ export class MemStorage implements IStorage {
             fileUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
             thumbnailUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400",
             fileType: "image"
+          },
+          {
+            fileUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee",
+            thumbnailUrl: "https://images.unsplash.com/photo-1682686580391-615b1f28e5ee?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://pixabay.com/get/g80aa2c5a8690b8d4cf96da8b3bbbc03c5bbfacbe6e5a7ff7fcca22b8b45093f8d6b13abfda42195c4fc6b56f0ae5f714.mp4",
+            thumbnailUrl: "https://i.vimeocdn.com/video/583083388-46d0ce9d987de915110ba48c69c96f2bc6a93d4fc8640dc37968df54539b91bc-d",
+            fileType: "video",
+            duration: "0:30"
+          }
+        ]
+      });
+
+      // Additional Nature Gallery
+      await this.createGallery({
+        title: "Wildlife Moments",
+        description: "Amazing wildlife captures",
+        userId: demoUser2.id,
+        tags: ["wildlife", "nature", "animals"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7",
+            thumbnailUrl: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://pixabay.com/get/g5c95cf11a5c4fa9c5b6c67da40d16c9fcd96c7a31b8fc0ad08ff66c8b37b1bdfc3d2e06da31dbf6d48eb9bf38f5a7f7c.mp4",
+            thumbnailUrl: "https://i.vimeocdn.com/video/746506397-a1cc6c80d99f7815c7a9e2ff0e6f17f7f5c0144e38d1d738ca7bf51bd6463e75-d",
+            fileType: "video",
+            duration: "0:20"
+          }
+        ]
+      });
+
+      // Urban Photography
+      await this.createGallery({
+        title: "Urban Life",
+        description: "City scenes and street photography",
+        userId: demoUser1.id,
+        tags: ["urban", "city", "street"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000",
+            thumbnailUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://pixabay.com/get/g5d2f06e3dc2c8cac8a897d6d990d1a6895c2e6dd9a3bbd91c8d52ce9aa3f37d9f6dfb5a47b76cb7f688a16c2b3b95d9d.mp4",
+            thumbnailUrl: "https://i.vimeocdn.com/video/723023542-d0fc3488e4b1761b907d76c06ffd769885d63dffee2676c78a76a9764c32edad-d",
+            fileType: "video",
+            duration: "0:15"
+          }
+        ]
+      });
+
+      // Artistic Collection
+      await this.createGallery({
+        title: "Abstract Art",
+        description: "Contemporary abstract photography",
+        userId: demoUser2.id,
+        tags: ["art", "abstract", "contemporary"],
+        visibility: "public",
+        items: [
+          {
+            fileUrl: "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8",
+            thumbnailUrl: "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=400",
+            fileType: "image"
+          },
+          {
+            fileUrl: "https://pixabay.com/get/g72e9c21f7aa4f60e3ef57ce5aebc4bd0b2e05f65ed0d7c4b874ecd2b38bc5b5c1c9edce4be7b2c93ba4a0b3d1ce8c649.mp4",
+            thumbnailUrl: "https://i.vimeocdn.com/video/734556028-5a05fdb043e9aa21baa4c53f8bcc1cc5e8f46f973ad0c1e3ffa49e33f531e744-d",
+            fileType: "video",
+            duration: "0:20"
           }
         ]
       });

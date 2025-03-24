@@ -1,6 +1,7 @@
 import { Content } from "@shared/schema";
 import ContentCard from "./content-card";
 import { useState, useEffect } from 'react';
+import { Link } from "wouter";
 
 interface ContentGridProps {
   content: Content[];

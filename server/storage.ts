@@ -527,16 +527,16 @@ export class MemStorage implements IStorage {
     try {
       console.log("Inicializando dados de demonstração...");
       
-      // Criar usuários de teste
+      // Criar usuários de teste com senhas simplificadas para demonstração
       const demoUser1 = await this.createUser({
         username: "demo",
-        password: "5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25.d048efa12c", // "password"
+        password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
         email: "demo@example.com"
       });
       
       const demoUser2 = await this.createUser({
         username: "creator",
-        password: "5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25.d048efa12c", // "password"
+        password: "f1f92c15fa30465e011a58925a15d7bc5b11e4f34f6a65131a14929af632eb0aa11d40694683c255d3fcccbe7004ccbed3f2aafe9db8b71a11ae9d09bb4ca6d1.e32dd38d0a", // "password"
         email: "creator@example.com"
       });
 

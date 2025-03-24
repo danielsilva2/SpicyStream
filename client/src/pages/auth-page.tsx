@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,40 +37,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
+  const { user, loginMutation, registerMutation } = useAuth();
   
-  // Tratamento seguro para o caso de o AuthProvider não estar disponível
-  let user = null;
-  let loginMutation = { 
-    mutate: () => {
-      toast({ 
-        title: "Authentication service unavailable",
-        description: "Please try again later",
-        variant: "destructive"
-      });
-    }, 
-    isPending: false
-  };
-  
-  let registerMutation = { 
-    mutate: () => {
-      toast({ 
-        title: "Authentication service unavailable",
-        description: "Please try again later",
-        variant: "destructive"
-      });
-    }, 
-    isPending: false
-  };
-  
-  try {
-    const auth = useAuth();
-    user = auth.user;
-    loginMutation = auth.loginMutation;
-    registerMutation = auth.registerMutation;
-  } catch (error) {
-    console.log("Auth context not available in AuthPage");
-  }
-
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -91,31 +59,15 @@ export default function AuthPage() {
   });
 
   function onLoginSubmit(values: LoginFormValues) {
-    try {
-      loginMutation.mutate({
-        username: values.username,
-        password: values.password,
-      });
-    } catch (error) {
-      toast({
-        title: "Login error",
-        description: "Could not process your login request",
-        variant: "destructive"
-      });
-    }
+    loginMutation.mutate({
+      username: values.username,
+      password: values.password,
+    });
   }
 
   function onRegisterSubmit(values: RegisterFormValues) {
-    try {
-      const { confirmPassword, terms, ...userData } = values;
-      registerMutation.mutate(userData);
-    } catch (error) {
-      toast({
-        title: "Registration error",
-        description: "Could not process your registration request",
-        variant: "destructive"
-      });
-    }
+    const { confirmPassword, terms, ...userData } = values;
+    registerMutation.mutate(userData);
   }
 
   useEffect(() => {

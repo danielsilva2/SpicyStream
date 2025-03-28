@@ -23,7 +23,7 @@ function Router() {
       <ProtectedRoute path="/feed" component={FeedPage} />
       <ProtectedRoute path="/saved" component={SavedPage} />
       <ProtectedRoute path="/upload" component={UploadPage} />
-      
+
       {/* Profile page is now public */}
       <Route path="/profile/:username?" component={ProfilePage} />
 

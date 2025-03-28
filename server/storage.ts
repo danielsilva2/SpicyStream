@@ -160,9 +160,12 @@ export class MemStorage implements IStorage {
   }
 
   async getFollowersCount(userId: number): Promise<number> {
-    return Array.from(this.followsData.values()).filter(
-      (f) => f.followingId === userId
-    ).length;
+    const uniqueFollowers = new Set(
+      Array.from(this.followsData.values())
+        .filter(f => f.followingId === userId)
+        .map(f => f.followerId)
+    );
+    return uniqueFollowers.size;
   }
 
   async createGallery(galleryData: any): Promise<Gallery> {
@@ -227,7 +230,12 @@ export class MemStorage implements IStorage {
 
   async getUserGalleries(userId: number): Promise<Content[]> {
     const userGalleries = Array.from(this.galleriesData.values())
-      .filter((gallery) => gallery.userId === userId && gallery.visibility === 'public')
+      .filter((gallery) => {
+        if (gallery.userId === userId) {
+          return gallery.visibility === 'public';
+        }
+        return false;
+      })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return userGalleries.map(gallery => {
@@ -375,7 +383,7 @@ export class MemStorage implements IStorage {
 
   async getUserContentCount(userId: number): Promise<number> {
     return Array.from(this.galleriesData.values()).filter(
-      (gallery) => gallery.userId === userId
+      (gallery) => gallery.userId === userId && gallery.visibility === 'public'
     ).length;
   }
 

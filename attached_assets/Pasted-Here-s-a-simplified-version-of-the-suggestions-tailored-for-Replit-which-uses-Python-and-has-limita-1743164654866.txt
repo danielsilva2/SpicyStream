@@ -1,0 +1,278 @@
+Here’s a simplified version of the suggestions tailored for Replit, which uses Python and has limitations like no persistent local storage or easy Redis setup. I’ll focus on a practical solution using Flask (since it’s lightweight and works well on Replit) and SQLite (Replit’s default database). This will manage users, followers, uploads, and view counts, with steps that Replit can handle.
+
+---
+
+### Simplified Plan for RedShare on Replit
+1. **Goal**: Fix user page to show real followers, uploads, and video views.
+2. **Tools**:
+   - Flask: For the web app.
+   - Flask-SQLAlchemy: For database (users, followers, videos).
+   - Flask-Login: For user sessions.
+   - File uploads: Store videos temporarily in Replit’s `/tmp` folder (since Replit resets local storage).
+3. **Features**:
+   - Users can follow each other.
+   - Users can upload videos.
+   - Videos show view counts.
+   - User page shows real data.
+
+---
+
+### Step-by-Step Code for Replit
+
+#### 1. Setup (Install Dependencies)
+In Replit, add these to your `requirements.txt`:
+```
+flask
+flask-sqlalchemy
+flask-login
+```
+
+Run `pip install -r requirements.txt` in the Replit shell.
+
+#### 2. Main File (`main.py`)
+Copy this into your `main.py`:
+
+```python
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, current_user
+import os
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"  # Change this to a random string
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///redshare.db"
+app.config["UPLOAD_FOLDER"] = "/tmp/uploads"  # Temporary folder on Replit
+
+# Create upload folder
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
+
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+
+# Database Models
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(50), nullable=False)  # Simple for now, no hashing
+
+class Follow(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    followed_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    filename = db.Column(db.String(100), nullable=False)
+    views = db.Column(db.Integer, default=0)
+
+# Create database
+with app.app_context():
+    db.create_all()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Routes
+@app.route("/")
+def home():
+    return render_template("home.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
+            login_user(user)
+            return redirect(url_for("profile", user_id=user.id))
+        return "Wrong credentials"
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User(username=username, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for("login"))
+    return render_template("register.html")
+
+@app.route("/follow/<int:user_id>")
+@login_required
+def follow(user_id):
+    follow = Follow(follower_id=current_user.id, followed_id=user_id)
+    db.session.add(follow)
+    db.session.commit()
+    return redirect(url_for("profile", user_id=user_id))
+
+@app.route("/upload", methods=["GET", "POST"])
+@login_required
+def upload():
+    if request.method == "POST":
+        file = request.files["video"]
+        if file:
+            filename = file.filename
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            video = Video(user_id=current_user.id, filename=filename)
+            db.session.add(video)
+            db.session.commit()
+            return redirect(url_for("profile", user_id=current_user.id))
+    return render_template("upload.html")
+
+@app.route("/profile/<int:user_id>")
+def profile(user_id):
+    user = User.query.get(user_id)
+    followers = Follow.query.filter_by(followed_id=user_id).count()
+    uploads = Video.query.filter_by(user_id=user_id).all()
+    return render_template("profile.html", user=user, followers=followers, uploads=uploads)
+
+@app.route("/video/<int:video_id>")
+def video(video_id):
+    video = Video.query.get(video_id)
+    video.views += 1
+    db.session.commit()
+    video_path = os.path.join(app.config["UPLOAD_FOLDER"], video.filename)
+    return render_template("video.html", video=video, video_path=video_path)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
+```
+
+#### 3. Templates (HTML Files)
+Create a `templates` folder in Replit and add these files:
+
+- **home.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>RedShare</title></head>
+<body>
+    <h1>Welcome to RedShare</h1>
+    <a href="/login">Login</a> | <a href="/register">Register</a>
+</body>
+</html>
+```
+
+- **login.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Login</title></head>
+<body>
+    <h1>Login</h1>
+    <form method="POST">
+        Username: <input type="text" name="username"><br>
+        Password: <input type="password" name="password"><br>
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>
+```
+
+- **register.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Register</title></head>
+<body>
+    <h1>Register</h1>
+    <form method="POST">
+        Username: <input type="text" name="username"><br>
+        Password: <input type="password" name="password"><br>
+        <input type="submit" value="Register">
+    </form>
+</body>
+</html>
+```
+
+- **upload.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Upload Video</title></head>
+<body>
+    <h1>Upload a Video</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="video"><br>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>
+```
+
+- **profile.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Profile</title></head>
+<body>
+    <h1>{{ user.username }}'s Profile</h1>
+    <p>Followers: {{ followers }}</p>
+    <p>Uploads: {{ uploads|length }}</p>
+    {% if user.id != current_user.id %}
+        <a href="/follow/{{ user.id }}">Follow</a>
+    {% endif %}
+    <h2>Uploads</h2>
+    {% for upload in uploads %}
+        <p><a href="/video/{{ upload.id }}">{{ upload.filename }} ({{ upload.views }} views)</a></p>
+    {% endfor %}
+    <a href="/upload">Upload a Video</a>
+</body>
+</html>
+```
+
+- **video.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Video</title></head>
+<body>
+    <h1>{{ video.filename }}</h1>
+    <video controls>
+        <source src="{{ video_path }}" type="video/mp4">
+    </video>
+    <p>Views: {{ video.views }}</p>
+</body>
+</html>
+```
+
+---
+
+### How It Works
+1. **Users**: Register and log in with a simple username/password system (you can add OAuth later).
+2. **Followers**: Click "Follow" on a profile to follow a user; the count updates instantly.
+3. **Uploads**: Upload videos, which are stored in `/tmp/uploads` and linked to the user in the database.
+4. **Views**: View counts increase each time a video is watched.
+5. **Profile**: Shows real follower count, upload count, and a list of videos.
+
+---
+
+### Simplifications for Replit
+- **Storage**: Uses `/tmp` because Replit doesn’t keep files permanently. For a real site, move to cloud storage (e.g., AWS S3).
+- **Auth**: Basic login for now (no OAuth yet) to keep it simple. Add Google/Twitter later with `Authlib`.
+- **Database**: SQLite works fine on Replit and persists between runs.
+
+---
+
+### How to Apply on Replit
+1. Replace your `main.py` with the code above.
+2. Create the `templates` folder and add the HTML files.
+3. Update `requirements.txt` and run `pip install -r requirements.txt` in the shell.
+4. Click "Run" in Replit and visit the URL (e.g., `https://your-replit-id.replit.dev/`).
+5. Register two users, follow one with the other, upload videos, and test the profile page.
+
+---
+
+### Notes
+- **Videos Disappear**: Replit resets `/tmp` when the app stops. For a permanent fix, use a cloud service (I can guide you later).
+- **Security**: Add password hashing (e.g., `bcrypt`) and HTTPS for production.
+- **Next Steps**: Add OAuth logins and move to a proper host like Render or Heroku.
+
+This should fix your issues with followers, uploads, and views while keeping it simple for Replit! Let me know if you hit any snags.

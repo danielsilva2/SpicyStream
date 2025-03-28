@@ -230,27 +230,27 @@ export class MemStorage implements IStorage {
       .filter((gallery) => gallery.userId === userId && gallery.visibility === 'public')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    const galleryContents: Content[] = [];
-    for (const gallery of userGalleries) {
+    return userGalleries.map(gallery => {
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
-      );
-      
-      if (firstItem) {
-        const user = this.usersData.get(gallery.userId);
-        galleryContents.push({
-          id: gallery.id,
-          title: gallery.title,
-          username: user ? user.username : 'unknown',
-          thumbnailUrl: firstItem.thumbnailUrl,
-          fileType: firstItem.fileType,
-          duration: firstItem.duration,
-          viewCount: gallery.viewCount,
-          createdAt: gallery.createdAt
-        });
-      }
-    }
-    return galleryContents;
+      ) || {
+        thumbnailUrl: '',
+        fileType: 'video',
+        duration: '0:00'
+      };
+
+      const user = this.usersData.get(gallery.userId);
+      return {
+        id: gallery.id,
+        title: gallery.title,
+        username: user ? user.username : 'unknown',
+        thumbnailUrl: firstItem.thumbnailUrl,
+        fileType: firstItem.fileType,
+        duration: firstItem.duration,
+        viewCount: gallery.viewCount,
+        createdAt: gallery.createdAt
+      };
+    });
   }
 
   async getAllContent(limit = 20, offset = 0, sortBy = 'recent'): Promise<Content[]> {

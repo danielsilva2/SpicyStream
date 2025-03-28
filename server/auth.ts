@@ -22,8 +22,10 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  // For demo purposes, accept any password that matches the stored one
-  return supplied === stored.split('.')[0];
+  const [hashedPassword, salt] = stored.split('.');
+  const buf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  const suppliedHashed = buf.toString("hex");
+  return hashedHashed === hashedPassword;
 }
 
 export function setupAuth(app: Express) {
@@ -48,17 +50,19 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        console.log(`Login attempt for user: ${username}`);
+        console.log(`Login attempt - Username: "${username}", Password length: ${password.length}`);
         const user = await storage.getUserByUsername(username);
         if (!user) {
-          console.log(`User not found: ${username}`);
+          console.log(`Login failed - User "${username}" not found in database`);
           return done(null, false);
         }
+        console.log(`Found user "${username}" - Comparing passwords...`);
         
         const passwordMatches = await comparePasswords(password, user.password);
-        console.log(`Password match result: ${passwordMatches}`);
+        console.log(`Password comparison for "${username}" - Match result: ${passwordMatches}`);
         
         if (!passwordMatches) {
+          console.log(`Login failed - Invalid password for user "${username}"`);
           return done(null, false);
         } else {
           return done(null, user);

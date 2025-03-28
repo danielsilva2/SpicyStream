@@ -161,10 +161,15 @@ export default function UploadForm() {
     }
 
     const formData = new FormData();
-    formData.append("title", data.title);
+    formData.append("title", data.title.trim());
     if (data.description) formData.append("description", data.description);
     if (data.tags) formData.append("tags", data.tags);
     formData.append("visibility", data.visibility);
+    
+    // Append each file
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
 
     files.forEach(file => {
       formData.append("files", file);

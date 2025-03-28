@@ -362,7 +362,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { title, description, tags, visibility } = req.body;
       const userId = req.user.id;
       
-      if (!title) {
+      console.log(`Upload request received - Title: "${title}", Files:`, req.files?.map(f => f.originalname));
+      
+      if (!title?.trim()) {
         return res.status(400).json({ message: "Title is required" });
       }
       

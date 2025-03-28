@@ -227,7 +227,7 @@ export class MemStorage implements IStorage {
 
   async getUserGalleries(userId: number): Promise<Content[]> {
     const userGalleries = Array.from(this.galleriesData.values())
-      .filter((gallery) => gallery.userId === userId)
+      .filter((gallery) => gallery.userId === userId && gallery.visibility === 'public')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return userGalleries.map(gallery => {
@@ -238,10 +238,13 @@ export class MemStorage implements IStorage {
         fileType: 'image'
       };
 
+      const user = this.usersData.get(gallery.userId);
+      const username = user ? user.username : 'unknown';
+
       return {
         id: gallery.id,
         title: gallery.title,
-        username: gallery.username,
+        username: username,
         thumbnailUrl: firstItem.thumbnailUrl,
         fileType: firstItem.fileType,
         duration: firstItem.duration,

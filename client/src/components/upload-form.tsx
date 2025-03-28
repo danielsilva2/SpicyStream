@@ -170,7 +170,6 @@ export default function UploadForm() {
     files.forEach((file) => {
       formData.append("files", file);
     });
-    });
 
     uploadMutation.mutate(formData);
   }

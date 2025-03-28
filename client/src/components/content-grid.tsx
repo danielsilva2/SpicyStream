@@ -3,16 +3,17 @@ import { useState, useEffect } from 'react';
 import { Link } from "wouter";
 
 interface ContentGridProps {
-  content: Content[];
+  content: Content[] | { items: Content[] };
 }
 
 export default function ContentGrid({ content: initialContent }: ContentGridProps) {
-  const [displayedContent, setDisplayedContent] = useState<Content[]>(initialContent);
+  const contentArray = Array.isArray(initialContent) ? initialContent : initialContent?.items || [];
+  const [displayedContent, setDisplayedContent] = useState<Content[]>(contentArray);
   const [visibleItems, setVisibleItems] = useState(12);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setDisplayedContent(initialContent);
+    setDisplayedContent(Array.isArray(initialContent) ? initialContent : initialContent?.items || []);
   }, [initialContent]);
 
   const loadMore = () => {

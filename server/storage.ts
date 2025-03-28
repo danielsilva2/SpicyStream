@@ -230,28 +230,27 @@ export class MemStorage implements IStorage {
       .filter((gallery) => gallery.userId === userId && gallery.visibility === 'public')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return userGalleries.map(gallery => {
+    const galleryContents: Content[] = [];
+    for (const gallery of userGalleries) {
       const firstItem = Array.from(this.contentItemsData.values()).find(
         (item) => item.galleryId === gallery.id
-      ) || {
-        thumbnailUrl: '',
-        fileType: 'image'
-      };
-
-      const user = this.usersData.get(gallery.userId);
-      const username = user ? user.username : 'unknown';
-
-      return {
-        id: gallery.id,
-        title: gallery.title,
-        username: username,
-        thumbnailUrl: firstItem.thumbnailUrl,
-        fileType: firstItem.fileType,
-        duration: firstItem.duration,
-        viewCount: gallery.viewCount,
-        createdAt: gallery.createdAt
-      };
-    });
+      );
+      
+      if (firstItem) {
+        const user = this.usersData.get(gallery.userId);
+        galleryContents.push({
+          id: gallery.id,
+          title: gallery.title,
+          username: user ? user.username : 'unknown',
+          thumbnailUrl: firstItem.thumbnailUrl,
+          fileType: firstItem.fileType,
+          duration: firstItem.duration,
+          viewCount: gallery.viewCount,
+          createdAt: gallery.createdAt
+        });
+      }
+    }
+    return galleryContents;
   }
 
   async getAllContent(limit = 20, offset = 0, sortBy = 'recent'): Promise<Content[]> {
@@ -514,12 +513,39 @@ export class MemStorage implements IStorage {
         profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400"
       });
 
-      await this.followUser(user1.id, user2.id);
-      await this.followUser(user1.id, user3.id);
-      await this.followUser(user2.id, user4.id);
-      await this.followUser(user3.id, user5.id);
-      await this.followUser(user4.id, user1.id);
+      // Set up naturelover (user1) to have followers and uploads
+      await this.followUser(user2.id, user1.id); // urbanexplorer follows naturelover
 
+      // Create two video uploads for naturelover
+      await this.createGallery({
+        title: "Sunrise at the Beach",
+        description: "Beautiful morning timelapse",
+        userId: user1.id,
+        tags: ["nature", "beach", "sunrise"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+          fileType: "video",
+          duration: "0:15"
+        }]
+      });
+
+      await this.createGallery({
+        title: "Mountain Stream",
+        description: "Peaceful water flowing",
+        userId: user1.id,
+        tags: ["nature", "water", "mountains"],
+        visibility: "public",
+        items: [{
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
+          fileType: "video",
+          duration: "0:20"
+        }]
+      });
+
+      // Other demo galleries
       await this.createGallery({
         title: "Beautiful Waterfalls",
         description: "Stunning waterfall scenes",

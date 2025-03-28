@@ -66,7 +66,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sortBy = req.query.sortBy as string || 'recent';
       
       const content = await storage.getAllContent(limit, offset, sortBy);
-      res.json(content);
+      const hasMore = content.length === limit;
+      res.json({
+        items: content,
+        hasMore,
+        nextOffset: hasMore ? offset + limit : null
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to fetch content" });

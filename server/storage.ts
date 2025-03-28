@@ -524,8 +524,8 @@ export class MemStorage implements IStorage {
         tags: ["nature", "water", "relaxing"],
         visibility: "public",
         items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/328890111/waterfall-23881.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/774667835-6769e9ffd8f8d5cf44f97bd8f63050127e35f191d4dfb2d060870170806e6c0e-d",
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
           fileType: "video",
           duration: "0:31"
         }]
@@ -538,8 +538,8 @@ export class MemStorage implements IStorage {
         tags: ["nature", "ocean", "waves"],
         visibility: "public",
         items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/178058381/ocean-4006.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/585731720-8c45d35d11dde0feb999b5c6505b7342326b7681991f449285df5bf38e27b8f4-d",
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
           fileType: "video",
           duration: "0:42"
         }]
@@ -552,8 +552,8 @@ export class MemStorage implements IStorage {
         tags: ["urban", "night", "timelapse"],
         visibility: "public",
         items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/414670315/city-40862.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/887059150-89145b318d43959e56b83f8f7829c5c58fb5eec6d37faa6a3b51a23adde25a0e-d",
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
           fileType: "video",
           duration: "0:20"
         }]
@@ -566,8 +566,8 @@ export class MemStorage implements IStorage {
         tags: ["urban", "people", "life"],
         visibility: "public",
         items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/443401203/traffic-46340.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/927956336-016e932a7437e5978593dd1ff9a5250662408a297d43e57c3c73ee2dd8506cfc-d",
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerEscapes.jpg",
           fileType: "video",
           duration: "0:15"
         }]
@@ -580,8 +580,8 @@ export class MemStorage implements IStorage {
         tags: ["wildlife", "ocean", "dolphins"],
         visibility: "public",
         items: [{
-          fileUrl: "https://cdn.pixabay.com/vimeo/457670133/dolphins-47947.mp4",
-          thumbnailUrl: "https://i.vimeocdn.com/video/947994582-e9264c472e46c0bb470b67751879a12fb2ea95f8614e94553cadded4cf80b2c5-d",
+          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg",
           fileType: "video",
           duration: "0:23"
         }]

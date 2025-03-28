@@ -30,14 +30,14 @@ type UploadFormValues = z.infer<typeof uploadFormSchema>;
 export default function UploadForm() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
+
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const form = useForm<UploadFormValues>({
     resolver: zodResolver(uploadFormSchema),
     defaultValues: {
@@ -47,11 +47,11 @@ export default function UploadForm() {
       visibility: "public",
     },
   });
-  
+
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       setIsUploading(true);
-      
+
       // Simulate upload progress
       const interval = setInterval(() => {
         setUploadProgress(prev => {
@@ -59,7 +59,7 @@ export default function UploadForm() {
           return newProgress >= 100 ? 100 : newProgress;
         });
       }, 500);
-      
+
       try {
         const res = await apiRequest("POST", "/api/upload", {});
         clearInterval(interval);
@@ -91,32 +91,32 @@ export default function UploadForm() {
       });
     },
   });
-  
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       handleFiles(Array.from(e.target.files));
     }
   };
-  
+
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.dataTransfer.files) {
       handleFiles(Array.from(e.dataTransfer.files));
     }
   };
-  
+
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
-  
+
   const handleFiles = (selectedFiles: File[]) => {
-    const validFiles = selectedFiles.filter(file => 
+    const validFiles = selectedFiles.filter(file =>
       ACCEPTED_FILE_TYPES.includes(file.type) && file.size <= MAX_FILE_SIZE
     );
-    
+
     if (validFiles.length !== selectedFiles.length) {
       toast({
         title: "Invalid Files",
@@ -124,25 +124,33 @@ export default function UploadForm() {
         variant: "destructive",
       });
     }
-    
+
     if (validFiles.length === 0) return;
-    
+
     setFiles(prev => [...prev, ...validFiles]);
-    
+
     // Create preview URLs
     const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
     setFilePreviewUrls(prev => [...prev, ...newPreviewUrls]);
   };
-  
+
   const removeFile = (index: number) => {
     setFiles(files => files.filter((_, i) => i !== index));
-    
+
     // Revoke the URL to prevent memory leaks
     URL.revokeObjectURL(filePreviewUrls[index]);
     setFilePreviewUrls(urls => urls.filter((_, i) => i !== index));
   };
-  
-  function onSubmit(values: UploadFormValues) {
+
+  const onSubmit = async (data: UploadFormValues) => {
+    if (!data.title?.trim()) {
+      toast({
+        title: "Error",
+        description: "Title is required",
+        variant: "destructive"
+      });
+      return;
+    }
     if (files.length === 0) {
       toast({
         title: "No Files Selected",
@@ -151,20 +159,20 @@ export default function UploadForm() {
       });
       return;
     }
-    
+
     const formData = new FormData();
-    formData.append("title", values.title);
-    if (values.description) formData.append("description", values.description);
-    if (values.tags) formData.append("tags", values.tags);
-    formData.append("visibility", values.visibility);
-    
+    formData.append("title", data.title);
+    if (data.description) formData.append("description", data.description);
+    if (data.tags) formData.append("tags", data.tags);
+    formData.append("visibility", data.visibility);
+
     files.forEach(file => {
       formData.append("files", file);
     });
-    
+
     uploadMutation.mutate(formData);
   }
-  
+
   return (
     <Card>
       <CardHeader>
@@ -176,7 +184,7 @@ export default function UploadForm() {
             {/* File Upload Area */}
             <div className="mb-6">
               <FormLabel className="block text-sm font-medium text-gray-700 mb-2">Files</FormLabel>
-              <div 
+              <div
                 className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -188,13 +196,13 @@ export default function UploadForm() {
                   <div className="flex text-sm text-gray-600">
                     <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none">
                       <span>Upload files</span>
-                      <input 
-                        id="file-upload" 
-                        name="file-upload" 
-                        type="file" 
-                        className="sr-only" 
-                        multiple 
-                        accept="image/jpeg,image/png,video/mp4" 
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        multiple
+                        accept="image/jpeg,image/png,video/mp4"
                         onChange={handleFileChange}
                         ref={fileInputRef}
                       />
@@ -207,7 +215,7 @@ export default function UploadForm() {
                 </div>
               </div>
             </div>
-            
+
             {/* Uploaded Files Preview */}
             {files.length > 0 && (
               <div className="mb-6">
@@ -216,14 +224,14 @@ export default function UploadForm() {
                   {filePreviewUrls.map((url, index) => (
                     <div key={index} className="relative group">
                       <div className="aspect-video bg-gray-100 rounded-md overflow-hidden">
-                        <img 
-                          src={url} 
-                          alt={`Upload preview ${index + 1}`} 
-                          className="w-full h-full object-cover" 
+                        <img
+                          src={url}
+                          alt={`Upload preview ${index + 1}`}
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => removeFile(index)}
                         className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
@@ -237,7 +245,7 @@ export default function UploadForm() {
                 </div>
               </div>
             )}
-            
+
             {/* Title and Description */}
             <FormField
               control={form.control}
@@ -252,7 +260,7 @@ export default function UploadForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -260,18 +268,18 @@ export default function UploadForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Add a description..."
-                      className="resize-none" 
+                      className="resize-none"
                       rows={3}
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="tags"
@@ -279,7 +287,7 @@ export default function UploadForm() {
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       placeholder="Add tags separated by commas (e.g., nature, landscape, travel)"
                       {...field}
                     />
@@ -288,15 +296,15 @@ export default function UploadForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="visibility"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Visibility</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
+                  <Select
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -313,7 +321,7 @@ export default function UploadForm() {
                 </FormItem>
               )}
             />
-            
+
             {/* Upload Progress */}
             {isUploading && (
               <div className="mt-6">
@@ -324,7 +332,7 @@ export default function UploadForm() {
                 </p>
               </div>
             )}
-            
+
             {/* Submit Buttons */}
             <div className="flex items-center justify-end space-x-3">
               <Button

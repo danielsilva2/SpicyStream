@@ -25,7 +25,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
+
   // Fetch user data
   const {
     data: user,
@@ -41,15 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "Content-Type": "application/json",
           },
         });
-        
+
         if (res.status === 401) {
           return null;
         }
-        
+
         if (!res.ok) {
           throw new Error("Failed to fetch user data");
         }
-        
+
         return await res.json();
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -70,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      queryClient.invalidateQueries({ queryKey: ['user'] }); // Added this line
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.username}!`,

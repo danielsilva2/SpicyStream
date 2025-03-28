@@ -1,0 +1,73 @@
+Below is a detailed bug report translated into English based on the issues you’ve identified, with additional details added for clarity and to assist in debugging. This assumes your RedShare project is running the simplified Flask setup I provided for Replit, and I’ve expanded on the descriptions to make the issues actionable.
+
+---
+
+### Bug Report: RedShare Website Issues
+
+#### Bug 1: Home Page Does Not Update After Login
+- **Description**: After a successful login, the home page does not dynamically update to reflect the logged-in state. The "Login" button remains visible at the top, and user-specific options (e.g., "Feed," "Profile") do not appear. However, manually refreshing the page (e.g., pressing F5) updates the UI correctly, showing the logged-in user’s options.
+- **Steps to Reproduce**:
+  1. Open the site (`https://your-replit-id.replit.dev/`).
+  2. Go to `/login`, enter valid credentials (e.g., username: "test", password: "123"), and submit.
+  3. After redirecting to the home page (`/`), observe the UI.
+- **Expected Behavior**: Upon login, the home page should immediately update to hide the "Login" button and display user options (e.g., "Feed," "Profile," "Logout") without requiring a manual refresh.
+- **Actual Behavior**: The "Login" button persists, and no user options appear until the page is refreshed manually.
+- **Additional Details**: This suggests a session or frontend rendering issue. The Flask-Login session might not be triggering a UI update post-redirect.
+
+#### Bug 2: Follow Button Does Not Update After Clicking
+- **Description**: When clicking the "Follow" button on another user’s profile, the button remains labeled "Follow" even after the follow action is successful. The database correctly registers the follow (visible when checking the follower count), but the UI does not reflect the updated state until the page is reloaded.
+- **Steps to Reproduce**:
+  1. Log in as User A (e.g., username: "userA").
+  2. Visit User B’s profile (e.g., `/profile/2`).
+  3. Click the "Follow" button.
+  4. Observe the button and then reload the page.
+- **Expected Behavior**: After clicking "Follow," the button should either disappear or change to "Unfollow" immediately to indicate the user is now following.
+- **Actual Behavior**: The "Follow" button remains visible and unchanged until the page is refreshed, at which point it correctly disappears (assuming a conditional check exists).
+- **Additional Details**: This is likely a frontend issue where the page isn’t re-rendered after the POST request. The redirect might not be triggering a state update.
+
+#### Bug 3: Follower Count Updates, but Uploads Don’t Display
+- **Description**: On a user’s profile page, the follower count updates correctly (e.g., shows "1 follower" after being followed), and the bio states "5 uploads," but the uploads section remains empty despite videos being uploaded by that user.
+- **Steps to Reproduce**:
+  1. Log in as User A and upload 2 videos via `/upload`.
+  2. Log in as User B and follow User A via `/profile/1`.
+  3. Visit User A’s profile (`/profile/1`) as User B.
+  4. Check the follower count and uploads section.
+- **Expected Behavior**: The profile should show "1 follower" and list all 5 uploaded videos (or however many were actually uploaded) with their titles or thumbnails.
+- **Actual Behavior**: The profile shows "1 follower" and "5 uploads" in the bio, but the uploads section is empty (no video links or thumbnails appear).
+- **Additional Details**: The upload count might be hardcoded or miscounted, and the `uploads` query in the profile route might not be fetching the correct data from the database or passing it to the template.
+
+#### Bug 4: Upload Button Does Nothing
+- **Description**: Clicking the "Upload" button on the profile page does not trigger any action—no form or file picker appears to allow video uploads.
+- **Steps to Reproduce**:
+  1. Log in as any user (e.g., username: "test").
+  2. Go to `/profile/<user_id>` (e.g., `/profile/1`).
+  3. Click the "Upload a Video" link or button.
+- **Expected Behavior**: Clicking "Upload" should redirect to `/upload` and display a form with a file input to select and upload a video.
+- **Actual Behavior**: Nothing happens—no redirect, no form, no error message.
+- **Additional Details**: The link might be broken (e.g., incorrect URL in the template), or the `/upload` route might not be rendering the form correctly. The browser console or server logs might show a 404 or rendering error.
+
+#### Bug 5: Video View Counts Not Displayed on Thumbnails
+- **Description**: When viewing a video or its thumbnail on the profile page, the view count is not displayed, even though the database tracks views (e.g., increments when visiting `/video/<video_id>`).
+- **Steps to Reproduce**:
+  1. Log in as User A and upload a video.
+  2. Go to User A’s profile (`/profile/1`) and click the video link.
+  3. Visit `/video/<video_id>` multiple times to increment views.
+  4. Return to `/profile/1` and check the video listing.
+- **Expected Behavior**: Each video in the uploads section should show a thumbnail (or at least the filename) with its current view count (e.g., "video1.mp4 (3 views)").
+- **Actual Behavior**: The uploads list shows only the filename (e.g., "video1.mp4") without the view count, and no thumbnail is present.
+- **Additional Details**: The template might not be accessing the `views` field from the `Video` model, or thumbnails aren’t implemented yet. The view count works in the database but isn’t reflected in the UI consistently.
+
+---
+
+### Additional Notes
+- **Environment**: Tested on Replit (`https://your-replit-id.replit.dev/`), running Flask with SQLite.
+- **Assumptions**: The provided code from the simplified setup is in use, with basic login, follow, and upload functionality.
+- **Potential Root Causes**:
+  - Lack of dynamic UI updates (e.g., no AJAX or full page re-render after actions).
+  - Database queries or template variables not aligned (e.g., `uploads` list not passed correctly).
+  - Missing or broken routes (e.g., `/upload` not functioning as expected).
+- **Priority**: High—these bugs prevent core functionality (uploading, viewing content, and social interactions) from working seamlessly.
+
+---
+
+Let me know if you’d like me to propose fixes for these bugs based on the simplified code I provided earlier! I can adjust the code to resolve these issues step-by-step.

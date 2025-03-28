@@ -3,8 +3,18 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
+
+// Production security headers
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet());
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || true,
+    credentials: true
+  }));
+  app.set('trust proxy', 1);
+}
 
 app.use((req, res, next) => {
   const start = Date.now();

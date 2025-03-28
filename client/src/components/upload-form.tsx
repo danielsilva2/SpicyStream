@@ -166,13 +166,10 @@ export default function UploadForm() {
     if (data.tags) formData.append("tags", data.tags);
     formData.append("visibility", data.visibility);
     
-    // Append each file
+    // Append each file only once
     files.forEach((file) => {
       formData.append("files", file);
     });
-
-    files.forEach(file => {
-      formData.append("files", file);
     });
 
     uploadMutation.mutate(formData);

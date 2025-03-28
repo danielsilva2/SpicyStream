@@ -486,6 +486,7 @@ export class MemStorage implements IStorage {
     try {
       console.log("Inicializando dados de demonstração...");
 
+      // Original users
       const user1 = await this.createUser({
         username: "naturelover",
         password: "password",
@@ -500,25 +501,40 @@ export class MemStorage implements IStorage {
         profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400"
       });
 
-      const user3 = await this.createUser({
-        username: "wildlifepro",
+      // New users
+      const newUser1 = await this.createUser({
+        username: "gamingpro",
         password: "password",
-        email: "wildlife@example.com",
-        profileImage: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=400"
+        email: "gaming@example.com",
+        profileImage: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=400"
       });
 
-      const user4 = await this.createUser({
-        username: "timelapse",
+      const newUser2 = await this.createUser({
+        username: "musicmaker",
         password: "password",
-        email: "time@example.com",
-        profileImage: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400"
+        email: "music@example.com",
+        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
       });
 
-      const user5 = await this.createUser({
-        username: "cityscaper",
+      const newUser3 = await this.createUser({
+        username: "techgeek",
         password: "password",
-        email: "city@example.com",
-        profileImage: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400"
+        email: "tech@example.com",
+        profileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400"
+      });
+
+      const newUser4 = await this.createUser({
+        username: "foodlover",
+        password: "password",
+        email: "food@example.com",
+        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
+      });
+
+      const newUser5 = await this.createUser({
+        username: "travelblog",
+        password: "password",
+        email: "travel@example.com",
+        profileImage: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=400"
       });
 
       // Set up naturelover (user1) to have followers and uploads
@@ -610,19 +626,37 @@ export class MemStorage implements IStorage {
         }]
       });
 
-      await this.createGallery({
-        title: "Wild Dolphins",
-        description: "Dolphins in their natural habitat",
-        userId: user3.id,
-        tags: ["wildlife", "ocean", "dolphins"],
-        visibility: "public",
-        items: [{
-          fileUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-          thumbnailUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerFun.jpg",
-          fileType: "video",
-          duration: "0:23"
-        }]
-      });
+      // Add 25 random videos distributed among new users
+      const videoSources = [
+        ["https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", "BigBuckBunny.jpg"],
+        ["https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", "ElephantsDream.jpg"],
+        ["https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", "ForBiggerBlazes.jpg"],
+        ["https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", "ForBiggerEscapes.jpg"],
+        ["https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", "ForBiggerFun.jpg"]
+      ];
+
+      const users = [newUser1, newUser2, newUser3, newUser4, newUser5];
+      const categories = ["Gaming", "Music", "Tech", "Food", "Travel"];
+      
+      for(let i = 0; i < 25; i++) {
+        const user = users[i % 5];
+        const category = categories[i % 5];
+        const videoSource = videoSources[i % 5];
+        
+        await this.createGallery({
+          title: `${category} Video ${Math.floor(i/5) + 1}`,
+          description: `Amazing ${category.toLowerCase()} content`,
+          userId: user.id,
+          tags: [category.toLowerCase(), "content", "demo"],
+          visibility: "public",
+          items: [{
+            fileUrl: videoSource[0],
+            thumbnailUrl: `https://storage.googleapis.com/gtv-videos-bucket/sample/images/${videoSource[1]}`,
+            fileType: "video",
+            duration: "0:30"
+          }]
+        });
+      }
 
       console.log("Demo data initialized successfully!");
     } catch (error) {
